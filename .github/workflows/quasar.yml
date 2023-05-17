@@ -12,7 +12,7 @@ jobs:
 
     strategy:
       matrix:
-        node-version: [14.x, 16.x, 18.x]
+        node-version: [18.x]
 
     steps:
     - uses: actions/checkout@v3
@@ -28,3 +28,8 @@ jobs:
         npm install
         npm install @quasar/cli
         npx quasar build
+    - name: Archive production artifact
+      uses: actions/upload-artifact@v2
+      with:
+        name: dist
+        path: ./frontend/dist/spa
