@@ -12,7 +12,7 @@
         />
 
         <q-toolbar-title>
-          Quasar App
+          Leon Klute
         </q-toolbar-title>
 
         <div>Quasar v{{ $q.version }}</div>
@@ -31,7 +31,7 @@
           Essential Links
         </q-item-label>
 
-        <EssentialLink
+        <essential-link
           v-for="link in essentialLinks"
           :key="link.title"
           v-bind="link"
@@ -47,14 +47,25 @@
 
 <script lang="ts">
 import { defineComponent } from 'vue';
+import EssentialLink from '../components/EssentialLink.vue';
 
+const essentialLinks = [
+  {
+    title: 'Github Repository',
+    icon: 'code',
+    link: 'https://github.com/lesjon/leonklute.nl'
+  }
+]
 
 export default defineComponent({
   name: 'MainLayout',
-
+  components: {
+    EssentialLink
+  },
   data() {
     return {
-      leftDrawerOpen: false
+      leftDrawerOpen: false,
+      essentialLinks
     }
   },
 
