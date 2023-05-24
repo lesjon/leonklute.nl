@@ -1,4 +1,4 @@
-name: Quasar build
+name: Quasar build and deploy
 
 on:
   push:
@@ -28,11 +28,26 @@ jobs:
         npm install
         npm install @quasar/cli
         npx quasar build
+
     - name: Archive production artifact
       uses: actions/upload-artifact@v2
       with:
         name: dist
         path: ./frontend/dist/spa
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v3
+
+    - name: Download build artifact
+      uses: actions/download-artifact@v2
+      with:
+        name: dist
+        path: ./frontend/dist/spa
+
     - name: Release Website to S3
       uses: shallwefootball/s3-upload-action@master
       with:
