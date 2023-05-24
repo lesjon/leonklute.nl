@@ -2,14 +2,7 @@
   <q-layout view="lHh Lpr lFf">
     <q-header elevated>
       <q-toolbar>
-        <q-btn
-          flat
-          dense
-          round
-          icon="menu"
-          aria-label="Menu"
-          @click="toggleLeftDrawer"
-        />
+        <q-btn flat dense round icon="menu" aria-label="Menu" @click="toggleLeftDrawer" />
 
         <q-toolbar-title>
           Leon Klute
@@ -19,23 +12,13 @@
       </q-toolbar>
     </q-header>
 
-    <q-drawer
-      v-model="leftDrawerOpen"
-      show-if-above
-      bordered
-    >
+    <q-drawer v-model="leftDrawerOpen" show-if-above bordered>
       <q-list>
-        <q-item-label
-          header
-        >
+        <q-item-label header>
           Essential Links
         </q-item-label>
 
-        <essential-link
-          v-for="link in essentialLinks"
-          :key="link.title"
-          v-bind="link"
-        />
+        <essential-link v-for="link in essentialLinks" :key="link.title" v-bind="link" />
       </q-list>
     </q-drawer>
 
@@ -64,6 +47,11 @@ const essentialLinks = [
     title: 'Caesar Experts',
     icon: 'apartment',
     link: 'https://caesarexperts.nl/'
+  },
+  {
+    title: 'LinkedIn',
+    icon: 'groups',
+    link: 'https://www.linkedin.com/in/leon-klute-814892167'
   }
 ]
 
@@ -80,7 +68,7 @@ export default defineComponent({
   },
 
   methods: {
-    toggleLeftDrawer () {
+    toggleLeftDrawer() {
       this.leftDrawerOpen = !this.leftDrawerOpen
     }
   }

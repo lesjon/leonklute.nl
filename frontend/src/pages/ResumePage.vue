@@ -1,13 +1,15 @@
 <template>
   <q-page padding>
-    <experience-listing />
+    <motivation-component />
+    <methods-component />
   </q-page>
 </template>
 
 <script lang="ts">
-import ExperienceListing from 'src/components/ExperienceListing.vue';
+import MethodsComponent from 'src/components/MethodsComponent.vue';
+import MotivationComponent from 'src/components/MotivationComponent.vue';
 import { defineComponent } from 'vue'
 export default defineComponent({
-    components: { ExperienceListing }
+    components: { MethodsComponent, MotivationComponent }
 })
 </script>
