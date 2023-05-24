@@ -54,6 +54,16 @@ const essentialLinks = [
     title: 'Github Repository',
     icon: 'code',
     link: 'https://github.com/lesjon/leonklute.nl'
+  },
+  {
+    title: 'Resume',
+    icon: 'local_library',
+    link: '/#/resume'
+  },
+  {
+    title: 'Caesar Experts',
+    icon: 'apartment',
+    link: 'https://caesarexperts.nl/'
   }
 ]
 
