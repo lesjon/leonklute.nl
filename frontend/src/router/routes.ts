@@ -5,12 +5,14 @@ const routes: RouteRecordRaw[] = [
     path: '/resume',
     component: () => import('layouts/ResumeLayout.vue'),
     children: [{ path: '', component: () => import('pages/ResumePage.vue') },
-    { path: 'experience', component: () => import('pages/ExperiencePage.vue') }],
+    { path: 'experience', component: () => import('pages/ExperiencePage.vue') },
+    { path: 'education', component: () => import('pages/EducationPage.vue') }],
   },
   {
     path: '/',
-    component: () => import('layouts/MainLayout.vue'),
-    children: [{ path: '', component: () => import('pages/IndexPage.vue') }],
+    redirect: '/resume',
+    // component: () => import('layouts/MainLayout.vue'),
+    // children: [{ path: '', component: () => import('pages/IndexPage.vue') }],
   },
 
   // Always leave this as last one,
