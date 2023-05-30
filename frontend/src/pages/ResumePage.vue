@@ -1,7 +1,8 @@
 <template>
-  <q-page padding>
+  <q-page padding class="q-gutter-md">
     <motivation-component />
-    <div class="q-mt-md text-center">
+    <competences-component />
+    <div class="text-center">
       <q-btn
         color="primary"
         label="Download Resume"
@@ -15,15 +16,15 @@
 
 <script lang="ts">
 import MotivationComponent from 'src/components/MotivationComponent.vue';
+import CompetencesComponent from 'src/components/CompetencesComponent.vue';
 import { defineComponent } from 'vue';
 
-const BUCKET_URL = 'https://s3.eu-central-1.amazonaws.com/resume.leonklute.nl'
-
 export default defineComponent({
-  components: { MotivationComponent },
+  components: { MotivationComponent, CompetencesComponent },
   methods: {
     downloadResume() {
-      window.open(BUCKET_URL + '/resume.pdf', '_blank');
+      const resumeUri = this.$api.getUri({ url: '/resume.pdf' });
+      window.open(resumeUri, '_blank');
     }
   }
 })

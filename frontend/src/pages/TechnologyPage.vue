@@ -1,7 +1,7 @@
 <template>
-  <q-page padding>
-    <methods-component />
-    <technology-component />
+  <q-page padding class="q-gutter-md">
+      <technology-component hide-pagination/>
+      <methods-component hide-pagination/>
   </q-page>
 </template>
 

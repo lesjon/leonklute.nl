@@ -5,7 +5,7 @@
 <script lang="ts">
 import { QTableColumn } from 'quasar';
 import { defineComponent } from 'vue';
-import { Level } from './models';
+import { Level, LevelFormatter } from './models';
 
 interface Technology {
   'Waarde': string, 
@@ -24,18 +24,7 @@ const COLUMNS: QTableColumn[] = [
     label: 'Niveau',
     field: 'Level ( J / M / S / E )',
     align: 'left',
-    format: (value: Level) => {
-      switch (value) {
-        case Level.Junior:
-          return 'Junior'
-        case Level.Medior:
-          return 'Medior'
-        case Level.Senior:
-          return 'Senior'
-        case Level.Expert:
-          return 'Expert'
-      }
-    }
+    format: LevelFormatter
   }
 ]
 

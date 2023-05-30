@@ -4,3 +4,16 @@ export enum Level {
     Senior = 'S',
     Expert = 'E'
 }
+
+export const LevelFormatter = (value: Level) => {
+    switch (value) {
+      case Level.Junior:
+        return 'Junior'
+      case Level.Medior:
+        return 'Medior'
+      case Level.Senior:
+        return 'Senior'
+      case Level.Expert:
+        return 'Expert'
+    }
+  }
