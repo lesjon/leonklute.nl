@@ -1,5 +1,5 @@
 <template>
-  <q-img :src="image" />
+  <q-img :src="image" style="height: inherit;" fit="scale-down"/>
 </template>
 
 <script lang="ts">
@@ -9,8 +9,10 @@ import image from 'assets/selfie.jpeg';
 export default defineComponent({
   name: 'PhotoReel',
   data() {
+
     return {
-      image
+      image,
+
     }
   }
 });

@@ -1,5 +1,5 @@
 <template>
-  <q-table :rows="technologies" :columns="COLUMNS" title="Methodes" :rows-per-page-options="[0, 10, 20, 50]"/>
+  <q-table :rows="methods" :columns="COLUMNS" title="Methodes" :rows-per-page-options="[0, 10, 20, 50]"/>
 </template>
 
 <script lang="ts">
@@ -31,7 +31,7 @@ const COLUMNS: QTableColumn[] = [
 export default defineComponent({
   data: () => {
     return {
-      technologies: [] as Method[],
+      methods: [] as Method[],
       COLUMNS
     }
   },
@@ -40,10 +40,10 @@ export default defineComponent({
   },
   methods: {
     async fetchTechnologies() {
-      this.technologies = [];
+      this.methods = [];
       this.$api.get(`/methods.json`)
         .then((response) => {
-          this.technologies.push(...(response.data as Method[]))
+          this.methods.push(...(response.data as Method[]))
         })
     }
   }

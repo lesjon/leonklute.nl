@@ -1,26 +1,19 @@
 <template>
-  <q-page padding class="q-gutter-md">
-    <motivation-component />
-    <competences-component />
-    <div class="text-center">
-      <q-btn
-        color="primary"
-        label="Download Resume"
-        icon="get_app"
-        @click="downloadResume"
-        disable
-      />
-    </div>
+  <q-page padding class="flex items-stretch q-gutter-md">
+    <motivation-component class="row" />
+    <photo-reel class="col fit" />
+    <competences-component class="col" />
   </q-page>
 </template>
 
 <script lang="ts">
+import { defineComponent } from 'vue';
 import MotivationComponent from 'src/components/MotivationComponent.vue';
 import CompetencesComponent from 'src/components/CompetencesComponent.vue';
-import { defineComponent } from 'vue';
+import PhotoReel from 'src/components/PhotoReel.vue';
 
 export default defineComponent({
-  components: { MotivationComponent, CompetencesComponent },
+  components: { MotivationComponent, CompetencesComponent, PhotoReel },
   methods: {
     downloadResume() {
       const resumeUri = this.$api.getUri({ url: '/resume.pdf' });
