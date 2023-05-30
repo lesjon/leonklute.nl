@@ -1,5 +1,5 @@
 <template>
-  <q-table :rows="technologies" :columns="COLUMNS" title="Technologieën" />
+  <q-table :rows="technologies" :columns="COLUMNS" title="Technologieën" :rows-per-page-options="[0, 10, 20, 50]"/>
 </template>
 
 <script lang="ts">
@@ -53,9 +53,14 @@ export default defineComponent({
   },
   methods: {
     async fetchTechnologies() {
+      this.technologies = [];
       this.$axios.get(`${BUCKET_URL}/technologies.json`)
         .then((response) => {
-          this.technologies = response.data
+          this.technologies.push(...(response.data as Technology[]))
+        })
+      this.$axios.get(`${BUCKET_URL}/development.json`)
+        .then((response) => {
+          this.technologies.push(...(response.data as Technology[]))
         })
     }
   }

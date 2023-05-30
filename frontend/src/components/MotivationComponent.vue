@@ -1,7 +1,7 @@
 <template>
   <q-card>
     <q-card-section>
-      <div v-if="motivations.length > 0">{{ motivations[0]["Comment"] }}</div>
+      <div class="text-body1" v-if="motivations.length > 0">{{ motivations[0]["Comment"] }}</div>
     </q-card-section>
   </q-card>
 </template>
