@@ -5,15 +5,14 @@
         <q-toolbar-title>
           Curriculum Vitae Leon Klute
         </q-toolbar-title>
-        <q-tabs>
-          <q-route-tab icon="person" to="/resume" replace label="Persoon" />
-          <q-route-tab icon="route" to="/resume/experience" label="Ervaring" />
-          <q-route-tab icon="assignment" to="/resume/education" replace label="Opleidingen" />
-          <q-route-tab icon="handyman" to="/resume/technology" replace label="Technologieën" />
-        </q-tabs>
-        <q-space/>
+        <resume-tabs class="desktop-only"/>
+        <q-space class="desktop-only"/>
       </q-toolbar>
     </q-header>
+    
+    <q-footer class="mobile-only">
+      <resume-tabs />
+    </q-footer>
 
     <q-page-container>
       <router-view />
@@ -23,9 +22,11 @@
 </template>
 
 <script lang="ts">
-import { defineComponent } from 'vue'
+import { defineComponent } from 'vue';
+import ResumeTabs from 'src/components/ResumeTabs.vue';
 
 export default defineComponent({
-  name: 'ResumeLayout'
+  name: 'ResumeLayout',
+  components: { ResumeTabs }
 })
 </script>
