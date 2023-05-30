@@ -88,7 +88,14 @@ module.exports = configure(function (/* ctx */) {
     // Full list of options: https://v2.quasar.dev/quasar-cli-vite/quasar-config-js#devServer
     devServer: {
       // https: true
-      open: true // opens browser window automatically
+      open: true, // opens browser window automatically
+      proxy: {
+        '/resumeproxy': {
+          target: 'https://s3.eu-central-1.amazonaws.com/resume.leonklute.nl',
+          changeOrigin: true,
+          rewrite: (path) => path.replace(/^\/resumeproxy/, '')
+        }
+      }
     },
 
     // https://v2.quasar.dev/quasar-cli-vite/quasar-config-js#framework

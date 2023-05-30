@@ -9,8 +9,6 @@
 <script lang="ts">
 import { defineComponent } from 'vue';
 
-const BUCKET_URL = 'https://s3.eu-central-1.amazonaws.com/resume.leonklute.nl'
-
 interface Motivation {
   'Comment': string
 }
@@ -26,7 +24,7 @@ export default defineComponent({
   },
   methods: {
     async fetchExperiences() {
-      this.$axios.get(`${BUCKET_URL}/motivation.json`)
+      this.$api.get('/motivation.json')
         .then((response) => {
           this.motivations = response.data
         })

@@ -7,8 +7,6 @@ import { QTableColumn } from 'quasar';
 import { defineComponent } from 'vue';
 import { Level } from './models';
 
-const BUCKET_URL = 'https://s3.eu-central-1.amazonaws.com/resume.leonklute.nl'
-
 interface Technology {
   'Waarde': string, 
   'Level ( J / M / S / E )': Level
@@ -54,11 +52,11 @@ export default defineComponent({
   methods: {
     async fetchTechnologies() {
       this.technologies = [];
-      this.$axios.get(`${BUCKET_URL}/technologies.json`)
+      this.$api.get(`/technologies.json`)
         .then((response) => {
           this.technologies.push(...(response.data as Technology[]))
         })
-      this.$axios.get(`${BUCKET_URL}/development.json`)
+      this.$api.get(`/development.json`)
         .then((response) => {
           this.technologies.push(...(response.data as Technology[]))
         })
