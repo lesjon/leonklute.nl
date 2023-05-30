@@ -1,5 +1,5 @@
 <template>
-  <q-table :rows="courses" :columns="COLUMNS" title="Cursussen"  />
+  <q-table :rows="courses" :columns="COLUMNS" title="Cursussen" :rows-per-page-options="[0]" hide-pagination/>
 </template>
 
 <script lang="ts">

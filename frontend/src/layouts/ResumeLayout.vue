@@ -3,7 +3,8 @@
     <q-header elevated>
       <q-toolbar>
         <q-toolbar-title>
-          Curriculum Vitae Leon Klute
+          <span class="gt-sm">Curriculum Vitae</span>
+          <span class="lt-md">CV</span> Leon Klute
         </q-toolbar-title>
         <resume-tabs class="desktop-only"/>
         <q-space class="desktop-only"/>
