@@ -9,7 +9,7 @@ export default defineComponent({
   name: 'DownloadButton',
   methods: {
     downloadResume() {
-      const resumeUri = this.$api.getUri({ url: '/resume.docx' });
+      const resumeUri = this.$api.getUri({ url: 'resume/files/resume.docx' });
       window.open(resumeUri, '_blank');
     }
   }
