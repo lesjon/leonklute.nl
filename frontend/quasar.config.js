@@ -91,7 +91,7 @@ module.exports = configure(function (/* ctx */) {
       open: true, // opens browser window automatically
       proxy: {
         '/resumeproxy': {
-          target: 'https://s3.eu-central-1.amazonaws.com/resume.leonklute.nl',
+          target: 'https://api.leonklute.nl',
           changeOrigin: true,
           rewrite: (path) => path.replace(/^\/resumeproxy/, '')
         }
@@ -113,7 +113,9 @@ module.exports = configure(function (/* ctx */) {
       // directives: [],
 
       // Quasar plugins
-      plugins: []
+      plugins: [
+        'Notify',
+      ]
     },
 
     // animations: 'all', // --- includes all animations

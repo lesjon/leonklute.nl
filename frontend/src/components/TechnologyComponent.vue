@@ -41,11 +41,11 @@ export default defineComponent({
   methods: {
     async fetchTechnologies() {
       this.technologies = [];
-      this.$api.get(`/technologies.json`)
+      this.$api.get('/resume/files/technologies.json')
         .then((response) => {
           this.technologies.push(...(response.data as Technology[]))
         })
-      this.$api.get(`/development.json`)
+      this.$api.get('/resume/files/development.json')
         .then((response) => {
           this.technologies.push(...(response.data as Technology[]))
         })

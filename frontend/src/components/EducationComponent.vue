@@ -48,7 +48,7 @@ export default defineComponent({
   },
   methods: {
     async fetchExperiences() {
-      this.$api.get(`/education.json`)
+      this.$api.get('/resume/files//education.json')
         .then((response) => {
           this.educationAndCourses = response.data
         })

@@ -6,8 +6,11 @@
           <span class="gt-sm">Curriculum Vitae</span>
           <span class="lt-md">CV</span> Leon Klute
         </q-toolbar-title>
-        <download-button color="secondary" class="q-mx-sm"/>
         <resume-tabs class="desktop-only"/>
+        <div class="col-3 row q-gutter-sm justify-end no-wrap">
+        <download-button color="secondary"/>
+        <update-resources color="secondary"/>
+        </div>
       </q-toolbar>
     </q-header>
     
@@ -26,9 +29,10 @@
 import { defineComponent } from 'vue';
 import ResumeTabs from 'src/components/ResumeTabs.vue';
 import DownloadButton from 'src/components/DownloadButton.vue';
+import UpdateResources from 'src/components/UpdateResources.vue';
 
 export default defineComponent({
   name: 'ResumeLayout',
-  components: { ResumeTabs, DownloadButton }
+  components: { ResumeTabs, DownloadButton, UpdateResources }
 })
 </script>

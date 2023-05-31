@@ -49,7 +49,7 @@ export default defineComponent({
   },
   methods: {
     async fetchExperiences() {
-      this.$api.get(`/experiences.json`)
+      this.$api.get('/resume/files/experiences.json')
         .then((response) => {
           this.experiences = response.data
         })

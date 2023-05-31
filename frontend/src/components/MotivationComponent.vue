@@ -24,7 +24,7 @@ export default defineComponent({
   },
   methods: {
     async fetchExperiences() {
-      this.$api.get('/motivation.json')
+      this.$api.get('/resume/files/motivation.json')
         .then((response) => {
           this.motivations = response.data
         })

@@ -8,7 +8,7 @@ declare module '@vue/runtime-core' {
   }
 }
 
-let baseURL = "https://s3.eu-central-1.amazonaws.com/resume.leonklute.nl";
+let baseURL = "https://api.leonklute.nl";
 if(process.env.NODE_ENV === 'development') {
   baseURL = "/resumeproxy";
 }

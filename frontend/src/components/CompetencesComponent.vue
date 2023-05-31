@@ -42,7 +42,7 @@ export default defineComponent({
   methods: {
     async fetchTechnologies() {
       this.technologies = [];
-      this.$api.get(`/competences.json`)
+      this.$api.get('/resume/files/competences.json')
         .then((response) => {
           this.technologies.push(...(response.data as Method[]))
         })

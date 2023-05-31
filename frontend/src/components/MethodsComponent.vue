@@ -41,7 +41,7 @@ export default defineComponent({
   methods: {
     async fetchTechnologies() {
       this.methods = [];
-      this.$api.get(`/methods.json`)
+      this.$api.get('/resume/files/methods.json')
         .then((response) => {
           this.methods.push(...(response.data as Method[]))
         })
