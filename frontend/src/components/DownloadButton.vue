@@ -1,5 +1,5 @@
 <template>
-  <q-btn color="primary" label="PDF" icon="get_app" @click="downloadResume"/>
+  <q-btn color="primary" label="DOCX" icon="get_app" @click="downloadResume"/>
 </template>
 
 <script lang="ts">
@@ -9,7 +9,7 @@ export default defineComponent({
   name: 'DownloadButton',
   methods: {
     downloadResume() {
-      const resumeUri = this.$api.getUri({ url: '/resume.pdf' });
+      const resumeUri = this.$api.getUri({ url: '/resume.docx' });
       window.open(resumeUri, '_blank');
     }
   }
