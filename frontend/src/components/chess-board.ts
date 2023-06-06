@@ -1,4 +1,4 @@
-import { FENpieces } from "./chess-pieces";
+import { ChessPiece, FENpieces } from "./chess-pieces";
 
 // define rows as 1 to 8
 export const rows = Array.from({ length: 8 }, (_, i) => i + 1);
@@ -19,7 +19,7 @@ export enum columnLetters {
 export interface Square {
     row: number;
     column: number;
-    piece?: FENpieces;
+    piece?: ChessPiece | null;
 }
 
 // function to test whether a square is in the same location as another square

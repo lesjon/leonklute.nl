@@ -1,5 +1,5 @@
 import { ChessPiece, ChessPieceFromFen, FENpieces, isOpponentFen } from './chess-pieces';
-import { rows, columns, Square, columnLetters } from './chess-board';
+import { rows, columns, Square, columnLetters, isSameLocation } from './chess-board';
 
 
 
@@ -52,6 +52,22 @@ export default class ChessGame {
         return board2DArray;
     }
 
+    toFen() {
+        const boardArray = this.board2DArray.map(row => {
+            const rowArray = row.map(cell => {
+                if (cell) {
+                    return cell.getFenKey();
+                } else {
+                    return '1';
+                }
+            });
+            //  TODO: sum 1s into a number
+            return rowArray.join('');
+        });
+        const board = boardArray.reverse().join('/');
+        return `${board} ${this.turn} ${this.castling} ${this.enPassant} ${this.halfMove} ${this.fullMove}`;
+    }
+
     movePiece(from: Square, to: Square) {
         const piece = this.getPieceAt(from.row, from.column);
         this.board2DArray[from.row - 1][from.column - 1] = null;
@@ -75,16 +91,28 @@ export default class ChessGame {
     }
 
     movePieceIfLegal(from: Square, to: Square, enPassant?: Square) {
+        console.log({ from, to, enPassant });
         if (!from.piece) {
+            console.log('no piece');
             return false;
         }
-        if (ChessPieceFromFen(from.piece)?.getColor() !== this.turn) {
+        console.log({ fromColor: from.piece?.getColor(), turn: this.turn })
+        if (from.piece?.getColor() !== this.turn) {
+            console.log('not your turn');
+            return false;
+        }
+        if (!from.piece.getPossibleMoves(from).find(move => isSameLocation(move, to))) {
+            console.log('not a possible move');
+            return false;
         }
 
+
         if (!to.piece) {
+            console.log('no piece at to, moving');
             this.movePiece(from, to);
             return true;
-        } else if (isOpponentFen(from.piece, to.piece)) {
+        } else if (from.piece.isOpponent(to.piece)) {
+            console.log('take piece at ', to);
             this.movePiece(from, to);
             return true;
         }

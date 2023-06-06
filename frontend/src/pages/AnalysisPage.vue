@@ -1,6 +1,7 @@
 <template>
   <q-page padding>
     <chess-board :game="game" />
+    <pre>{{ game.toFen() }}</pre>
   </q-page>
 </template>
 

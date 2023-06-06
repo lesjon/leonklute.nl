@@ -57,6 +57,7 @@ export default defineComponent({
   },
   methods: {
     onClick() {
+      console.log(`Clicked on square ${this.column}, ${this.row}`, this.piece)
       this.$emit('click', this.row, this.column, this.piece);
     }
   }

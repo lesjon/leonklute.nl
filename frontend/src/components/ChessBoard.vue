@@ -16,7 +16,7 @@ import { defineComponent, PropType } from 'vue';
 import { rows, columns, Square, isSameLocation, columnLetters } from './chess-board';
 import ChessSquare from './ChessSquare.vue';
 import ChessGame, { EnPassant } from './chess-game';
-import { FENpieces } from './chess-pieces';
+import { ChessPiece, FENpieces } from './chess-pieces';
 
 export default defineComponent({
   name: 'ChessBoard',
@@ -39,11 +39,11 @@ export default defineComponent({
   },
   methods: {
     isSameLocation,
-    onSquareClick(row: number, column: number, piece?: FENpieces) {
+    onSquareClick(row: number, column: number, piece: ChessPiece | undefined) {
       console.log(`Clicked on square ${columnLetters[column]}, ${row}`);
       const enPassant = new EnPassant(this.game?.enPassant || '-');
       if (this.selectedSquare) {
-        const toSquare = { row, column, piece };
+        const toSquare = { row, column, pieceFen: piece };
         if (this.game?.movePieceIfLegal(this.selectedSquare, toSquare, enPassant)) {
           this.selectedSquare = undefined;
           this.possibleMoves = [];
