@@ -116,7 +116,8 @@ abstract class ChessPieceBase implements ChessPiece {
         console.log('isOpponent', this.color, piece.getColor());
         return this.color !== piece.getColor();
     }
-    getPossibleMoves(position: Square): Square[] {
+    getPossibleMoves(position: Square, enPassant?: EnPassant): Square[] {
+        console.log('ChessPieceBase.getPossibleMoves', position)
         const possibleMoves: Square[] = [];
         this.getChessPieceSteps().forEach(step => {
             console.log('step', step);
@@ -189,10 +190,11 @@ class Pawn extends ChessPieceBase {
     }
 
 
-    getPossibleMoves(position: Square, enPassant?: Square): Square[] {
-        console.log('getPossibleMoves', position, enPassant);
+    override getPossibleMoves(position: Square, enPassant?: Square): Square[] {
+        console.log('Pawn.getPossibleMoves', {position, enPassant});
         const possibleMoves: Square[] = [];
         const enPassantMove = this.computeEnPassant(position, enPassant);
+        console.log('enPassantMove', enPassantMove);
         if (enPassantMove) {
             possibleMoves.push(enPassantMove);
         }

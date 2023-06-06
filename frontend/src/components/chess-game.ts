@@ -101,7 +101,7 @@ export default class ChessGame {
             console.log('not your turn');
             return false;
         }
-        if (!from.piece.getPossibleMoves(from).find(move => isSameLocation(move, to))) {
+        if (!from.piece.getPossibleMoves(from, enPassant).find(move => isSameLocation(move, to))) {
             console.log('not a possible move');
             return false;
         }
