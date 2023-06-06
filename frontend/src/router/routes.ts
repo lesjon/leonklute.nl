@@ -10,6 +10,11 @@ const routes: RouteRecordRaw[] = [
     { path: 'technology', component: () => import('pages/TechnologyPage.vue') }],
   },
   {
+    path: '/chess',
+    component: () => import('layouts/ChessLayout.vue'),
+    children: [{ path: '', component: () => import('pages/AnalysisPage.vue') }],
+  },
+  {
     path: '/',
     redirect: '/resume',
     // component: () => import('layouts/MainLayout.vue'),
