@@ -1,4 +1,4 @@
-import { ChessPiece, ChessPieceFromFen, FENpieces, isOpponentFen } from './chess-pieces';
+import { ChessPiece, ChessPieceFromFen, FENpieces } from './chess-pieces';
 import { rows, columns, Square, columnLetters, isSameLocation } from './chess-board';
 
 

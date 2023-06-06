@@ -94,15 +94,6 @@ export const ChessPieceFromFen = (fenKey: FENpieces): ChessPiece | null => {
     }
 }
 
-export function isOpponentFen(fromFen: FENpieces, toFen: FENpieces): boolean {
-    const fromPiece = ChessPieceFromFen(fromFen);
-    const toPiece = ChessPieceFromFen(toFen);
-    if (!fromPiece || !toPiece) {
-        return false;
-    }
-    return fromPiece?.isOpponent(toPiece);
-}
-
 abstract class ChessPieceBase implements ChessPiece {
     fullName: string;
     fenKey: string;
@@ -122,6 +113,7 @@ abstract class ChessPieceBase implements ChessPiece {
         return this.color;
     }
     isOpponent(piece: ChessPiece): boolean {
+        console.log('isOpponent', this.color, piece.getColor());
         return this.color !== piece.getColor();
     }
     getPossibleMoves(position: Square): Square[] {
