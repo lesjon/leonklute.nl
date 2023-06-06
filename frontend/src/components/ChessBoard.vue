@@ -2,19 +2,20 @@
   <q-responsive ratio="1" class="col" :style="`max-width: ${boardsize}vh;`">
     <div>
       <div class="row" v-for="row in rows" :key="row">
-        <chess-square class="col" v-for="column in columns" :key="column"
-          :row="row" :column="column" :selected-square="selectedSquare" :piece="game?.getPieceAt(row, column) || undefined"
-          @click="onSquareClick"/>
+        <chess-square class="col" v-for="column in columns" :key="column" :row="row" :column="column"
+          :selected-square="selectedSquare" :piece="game?.getPieceAt(row, column) || undefined" @click="onSquareClick"
+          :highlight="possibleMoves.some(sqr => isSameLocation({ row, column }, sqr))" />
       </div>
     </div>
   </q-responsive>
+  <q-btn class="q-mt-md" color="primary" label="New Game" @click="game?.newGame()" />
 </template>
 
 <script lang="ts">
 import { defineComponent, PropType } from 'vue';
-import ChessGame, { rows, columns, Square } from './chess-game';
+import { rows, columns, Square, isSameLocation } from './chess-board';
 import ChessSquare from './ChessSquare.vue';
-
+import ChessGame, { EnPassant } from './chess-game';
 
 export default defineComponent({
   name: 'ChessBoard',
@@ -32,19 +33,27 @@ export default defineComponent({
       columns,
       boardsize: 80,
       selectedSquare: undefined as Square | undefined,
+      possibleMoves: [] as Square[],
     };
   },
   methods: {
+    isSameLocation,
     onSquareClick(row: number, column: number, piece?: string) {
-      const toSquare = {row, column, piece};
-      if (!toSquare.piece && this.selectedSquare?.piece) {
-        console.log('move', this.selectedSquare, toSquare);
-        this.game?.movePiece(this.selectedSquare, toSquare);
-        this.selectedSquare = undefined;
-        return;
+      const enPassant = new EnPassant(this.game?.enPassant || '-');
+      if (this.selectedSquare) {
+        const toSquare = { row, column, piece };
+        if (this.game?.movePieceIfLegal(this.selectedSquare, toSquare, enPassant)) {
+          this.selectedSquare = undefined;
+          this.possibleMoves = [];
+          return;
+        }
       }
-      console.log('select', toSquare);
-      this.selectedSquare = toSquare;
+      this.selectedSquare = { row, column, piece };
+      if (piece) {
+        this.possibleMoves = this.game?.getPieceAt(row, column)?.getPossibleMoves({ row, column, piece }, enPassant) || [];
+      } else {
+        this.possibleMoves = [];
+      }
     },
   },
 })

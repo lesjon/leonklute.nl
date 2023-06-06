@@ -1,14 +1,5 @@
-
-// define rows as 1 to 8
-export const rows = Array.from({ length: 8 }, (_, i) => i + 1);
-// define columns as a to h
-export const columns = Array.from({ length: 8 }, (_, i) => i + 1);
-
-export interface Square {
-    row: number;
-    column: number;
-    piece?: string;
-}
+import { ChessPiece, ChessPieceFromFen, FENpieces } from './chess-pieces';
+import { rows, columns, Square } from './chess-board';
 
 export enum columnLetters {
     a = 0,
@@ -21,65 +12,6 @@ export enum columnLetters {
     h = 7
 }
 
-export enum FENpieces {
-    whiteKing = 'K',
-    whiteQueen = 'Q',
-    whiteRook = 'R',
-    whiteBishop = 'B',
-    whiteKnight = 'N',
-    whitePawn = 'P',
-    blackKing = 'k',
-    blackQueen = 'q',
-    blackRook = 'r',
-    blackBishop = 'b',
-    blackKnight = 'n',
-    blackPawn = 'p',
-}
-
-export const fen2FullName = (fen: string) => {
-    switch (fen) {
-        case FENpieces.whiteKing:
-            return 'king_white';
-        case FENpieces.whiteQueen:
-            return 'queen_white';
-        case FENpieces.whiteRook:
-            return 'rook_white';
-        case FENpieces.whiteBishop:
-            return 'bishop_white';
-        case FENpieces.whiteKnight:
-            return 'knight_white';
-        case FENpieces.whitePawn:
-            return 'pawn_white';
-        case FENpieces.blackKing:
-            return 'king_black';
-        case FENpieces.blackQueen:
-            return 'queen_black';
-        case FENpieces.blackRook:
-            return 'rook_black';
-        case FENpieces.blackBishop:
-            return 'bishop_black';
-        case FENpieces.blackKnight:
-            return 'knight_black';
-        case FENpieces.blackPawn:
-            return 'pawn_black';
-        default:
-            return 'empty';
-    }
-}
-
-export class ChessPiece{
-    fullName: string;
-    fenKey: string;
-    color: string;
-    constructor(fenKey: string){
-        this.fenKey = fenKey;
-        this.fullName = fen2FullName(fenKey);
-        this.color = fenKey === fenKey.toUpperCase() ? 'white' : 'black';
-    }
-    isOpponent(piece: ChessPiece){
-        return this.color !== piece.color;
-    }
-}
 
 export default class ChessGame{
     start_position_fen ='rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1';
@@ -88,15 +20,20 @@ export default class ChessGame{
     enPassant = '-';
     halfMove = '0';
     fullMove = '1';
-    board2DArray: (ChessPiece | null)[][] = Array.from({length: 8}, (_, i) => Array.from({length: 8}, (_, j) => null));
+    board2DArray: (ChessPiece | null)[][] = Array.from(rows, () => Array.from(columns, () => null));
 
     constructor(fen?: string){
         if (fen){
             this.board2DArray = this.fenParser(fen);
         } else {
-            this.board2DArray = this.fenParser(this.start_position_fen);
+            this.newGame();
         }
     }
+
+    newGame(){
+        this.board2DArray = this.fenParser(this.start_position_fen);
+    }
+
     
     getPieceAt(row: number, column: number){
         return this.board2DArray[row-1][column-1];
@@ -115,9 +52,9 @@ export default class ChessGame{
             const rowArray = row.split('');
             const row2DArray = rowArray.map(cell => {
                 if (isNaN(Number(cell))){
-                    return new ChessPiece(cell);
+                    return ChessPieceFromFen(cell as FENpieces);
                 } else {
-                    return Array.from({length: Number(cell)}, (_, i) => null);
+                    return Array.from({length: Number(cell)}, () => null);
                 }
             });
             return row2DArray.flat();
@@ -129,5 +66,40 @@ export default class ChessGame{
         const piece = this.getPieceAt(from.row, from.column);
         this.board2DArray[from.row-1][from.column-1] = null;
         this.board2DArray[to.row-1][to.column-1] = piece;
+                const rowDelta = to.row - from.row;
+        if(piece?.getFenKey().toLowerCase() === 'p'){
+            switch (rowDelta){
+                case 2:
+                    this.enPassant = `${columnLetters[to.column]}${to.row + 1}`;
+                    break;
+                case -2:
+                    this.enPassant = `${columnLetters[to.column]}${to.row - 1}`;
+                    break;
+                default:
+                    this.enPassant = '-';
+            }
+        } else {   
+            this.enPassant = '-';
+        }
+        console.log('enPassent at end of movePiece:', this.enPassant);
+    }
+
+    movePieceIfLegal(from: Square, to: Square, enPassant?: Square){
+        if (!to.piece && from.piece) {
+            this.movePiece(from, to);
+            return true;
+        }
+        return false;
+    }
+}
+
+export class EnPassant implements Square{
+    row: number;
+    column: number;
+    constructor(enPassentFen: string){
+        const column = enPassentFen[0];
+        const row = enPassentFen[1];
+        this.row = rows[rows.length-Number(row)-1];
+        this.column = columnLetters[column];
     }
 }
