@@ -3,7 +3,7 @@
     <div>
       <div class="row" v-for="row in rows" :key="row">
         <chess-square class="col" v-for="column in columns" :key="column"
-          :row="row" :column="column" :selected-square="selectedSquare" :piece="game?.getPieceAt(row, column)"
+          :row="row" :column="column" :selected-square="selectedSquare" :piece="game?.getPieceAt(row, column) || undefined"
           @click="onSquareClick"/>
       </div>
     </div>

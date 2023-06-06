@@ -10,7 +10,7 @@
 
 <script lang="ts">
 import { defineComponent } from 'vue';
-import { Square, fen2FullName } from './chess-game';
+import { ChessPiece, Square, fen2FullName } from './chess-game';
 import { PropType } from 'vue';
 
 export default defineComponent({
@@ -25,7 +25,7 @@ export default defineComponent({
       required: true,
     },
     piece: {
-      type: String,
+      type: Object as PropType<ChessPiece | null>,
       required: false,
     },
     highlight: {
@@ -47,7 +47,7 @@ export default defineComponent({
     },
     pieceImageFilename() {
       if (!this.piece) return;
-      const fullName = fen2FullName(this.piece);
+      const fullName = this.piece.fullName;
       return `src/assets/pieces/${fullName}.png`;
     },
     selected() {

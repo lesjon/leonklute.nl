@@ -67,6 +67,19 @@ export const fen2FullName = (fen: string) => {
     }
 }
 
+export class ChessPiece{
+    fullName: string;
+    fenKey: string;
+    color: string;
+    constructor(fenKey: string){
+        this.fenKey = fenKey;
+        this.fullName = fen2FullName(fenKey);
+        this.color = fenKey === fenKey.toUpperCase() ? 'white' : 'black';
+    }
+    isOpponent(piece: ChessPiece){
+        return this.color !== piece.color;
+    }
+}
 
 export default class ChessGame{
     start_position_fen ='rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1';
@@ -75,7 +88,7 @@ export default class ChessGame{
     enPassant = '-';
     halfMove = '0';
     fullMove = '1';
-    board2DArray: (string| null)[][] = Array.from({length: 8}, (_, i) => Array.from({length: 8}, (_, j) => null));
+    board2DArray: (ChessPiece | null)[][] = Array.from({length: 8}, (_, i) => Array.from({length: 8}, (_, j) => null));
 
     constructor(fen?: string){
         if (fen){
@@ -102,7 +115,7 @@ export default class ChessGame{
             const rowArray = row.split('');
             const row2DArray = rowArray.map(cell => {
                 if (isNaN(Number(cell))){
-                    return cell;
+                    return new ChessPiece(cell);
                 } else {
                     return Array.from({length: Number(cell)}, (_, i) => null);
                 }
