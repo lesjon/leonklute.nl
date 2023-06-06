@@ -52,6 +52,11 @@ const essentialLinks = [
     title: 'LinkedIn',
     icon: 'groups',
     link: 'https://www.linkedin.com/in/leon-klute-814892167'
+  },
+  {
+    title: 'Chess',
+    icon: 'groups',
+    link: 'https://www.leonklute.nl/chess'
   }
 ]
 
