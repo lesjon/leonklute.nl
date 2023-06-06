@@ -1,7 +1,7 @@
 <template>
   <q-responsive ratio="1" class="col" :style="`max-width: ${boardsize}vh;`">
     <div>
-      <div class="row" v-for="row in rows" :key="row">
+      <div class="row" v-for="row in rows.slice().reverse()" :key="row">
         <chess-square class="col" v-for="column in columns" :key="column" :row="row" :column="column"
           :selected-square="selectedSquare" :piece="game?.getPieceAt(row, column) || undefined" @click="onSquareClick"
           :highlight="possibleMoves.some(sqr => isSameLocation({ row, column }, sqr))" />
@@ -13,9 +13,10 @@
 
 <script lang="ts">
 import { defineComponent, PropType } from 'vue';
-import { rows, columns, Square, isSameLocation } from './chess-board';
+import { rows, columns, Square, isSameLocation, columnLetters } from './chess-board';
 import ChessSquare from './ChessSquare.vue';
 import ChessGame, { EnPassant } from './chess-game';
+import { FENpieces } from './chess-pieces';
 
 export default defineComponent({
   name: 'ChessBoard',
@@ -38,7 +39,8 @@ export default defineComponent({
   },
   methods: {
     isSameLocation,
-    onSquareClick(row: number, column: number, piece?: string) {
+    onSquareClick(row: number, column: number, piece?: FENpieces) {
+      console.log(`Clicked on square ${columnLetters[column]}, ${row}`);
       const enPassant = new EnPassant(this.game?.enPassant || '-');
       if (this.selectedSquare) {
         const toSquare = { row, column, piece };

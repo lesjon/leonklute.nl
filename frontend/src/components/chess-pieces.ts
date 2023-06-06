@@ -87,6 +87,15 @@ export const ChessPieceFromFen = (fenKey: FENpieces): ChessPiece | null => {
     }
 }
 
+export function isOpponentFen(fromFen: FENpieces, toFen: FENpieces): boolean {
+    const fromPiece = ChessPieceFromFen(fromFen);
+    const toPiece = ChessPieceFromFen(toFen);
+    if(!fromPiece || !toPiece){
+        return false;
+    }
+    return fromPiece?.isOpponent(toPiece);
+}
+
 abstract class ChessPieceBase implements ChessPiece{
     fullName: string;
     fenKey: string;
@@ -94,7 +103,7 @@ abstract class ChessPieceBase implements ChessPiece{
     constructor(fenKey: string){
         this.fullName = fen2FullName(fenKey);
         this.fenKey = fenKey;
-        this.color = fenKey === fenKey.toUpperCase() ? 'white' : 'black';        
+        this.color = fenKey === fenKey.toUpperCase() ? 'w' : 'b';        
     }
     getFullName(): string {
         return this.fullName;
@@ -188,28 +197,37 @@ class Pawn extends ChessPieceBase{
     constructor(fenKey: string){
         super(fenKey);
     }
-    getPossibleMoves(position: Square, enPassant?: Square): Square[] {
-        console.log('getPossibleMoves', position, enPassant);
-        const possibleMoves: Square[] = [];
+
+    computeEnPassant(position: Square, enPassant?: Square): Square | undefined{
         if (enPassant){
             console.log('enPassant', enPassant);
             const adjacentColumn = position.column === enPassant.column + 1 || position.column === enPassant.column - 1;
-            const correctRow = this.color === 'white' ? position.row === 4 : position.row === 5;
+            const correctRow = this.color === 'w' ? position.row === 5 : position.row === 4;
             if (adjacentColumn && correctRow){
-                possibleMoves.push(enPassant);
+                return enPassant;
             }
         }
+    }
 
-        if(this.color === 'white'){
-            if (position.row === 7) {
-                possibleMoves.push({row: position.row - 2, column: position.column});
-            }
-            possibleMoves.push({row: position.row - 1, column: position.column});
-        } else {
+
+    getPossibleMoves(position: Square, enPassant?: Square): Square[] {
+        console.log('getPossibleMoves', position, enPassant);
+        const possibleMoves: Square[] = [];
+        const enPassantMove = this.computeEnPassant(position, enPassant);
+        if (enPassantMove){
+            possibleMoves.push(enPassantMove);
+        }
+
+        if(this.color === 'w'){
             if (position.row === 2) {
                 possibleMoves.push({row: position.row + 2, column: position.column});
             }
             possibleMoves.push({row: position.row + 1, column: position.column});
+        } else {
+            if (position.row === 7) {
+                possibleMoves.push({row: position.row - 2, column: position.column});
+            }
+            possibleMoves.push({row: position.row - 1, column: position.column});
         }
         console.log('possibleMoves', possibleMoves);
         return possibleMoves;
