@@ -4,6 +4,12 @@ export const rows = Array.from({ length: 8 }, (_, i) => i + 1);
 // define columns as a to h
 export const columns = Array.from({ length: 8 }, (_, i) => i + 1);
 
+export interface Square {
+    row: number;
+    column: number;
+    piece?: string;
+}
+
 export enum columnLetters {
     a = 0,
     b = 1,
@@ -69,7 +75,7 @@ export default class ChessGame{
     enPassant = '-';
     halfMove = '0';
     fullMove = '1';
-    board2DArray = Array.from({length: 8}, (_, i) => Array.from({length: 8}, (_, j) => '0'));
+    board2DArray: (string| null)[][] = Array.from({length: 8}, (_, i) => Array.from({length: 8}, (_, j) => null));
 
     constructor(fen?: string){
         if (fen){
@@ -98,11 +104,17 @@ export default class ChessGame{
                 if (isNaN(Number(cell))){
                     return cell;
                 } else {
-                    return Array.from({length: Number(cell)}, (_, i) => '0');
+                    return Array.from({length: Number(cell)}, (_, i) => null);
                 }
             });
             return row2DArray.flat();
         });
         return board2DArray;
+    }
+
+    movePiece(from: Square, to: Square){
+        const piece = this.getPieceAt(from.row, from.column);
+        this.board2DArray[from.row-1][from.column-1] = null;
+        this.board2DArray[to.row-1][to.column-1] = piece;
     }
 }
