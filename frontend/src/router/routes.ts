@@ -12,7 +12,8 @@ const routes: RouteRecordRaw[] = [
   {
     path: '/chess',
     component: () => import('layouts/ChessLayout.vue'),
-    children: [{ path: '', component: () => import('pages/AnalysisPage.vue') }],
+    children: [{ path: '', redirect: '/chess/analysis' },
+    { path: 'analysis', component: () => import('pages/AnalysisPage.vue') },],
   },
   {
     path: '/',
