@@ -100,6 +100,7 @@ export class EnPassant implements Square {
         const column = enPassentFen[0];
         const row = enPassentFen[1];
         this.row = Number(row);
-        this.column = columnLetters[column];
+        const colNumber: number = columnLetters[column as keyof typeof columnLetters];
+        this.column = colNumber;
     }
 }
