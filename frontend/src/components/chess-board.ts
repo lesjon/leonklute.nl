@@ -1,4 +1,4 @@
-import { ChessPiece, FENpieces } from "./chess-pieces";
+import ChessPiece from './chess-pieces';
 
 // define rows as 1 to 8
 export const rows = Array.from({ length: 8 }, (_, i) => i + 1);
@@ -23,6 +23,34 @@ export interface Square {
 }
 
 // function to test whether a square is in the same location as another square
-export function isSameLocation(square1: Square, square2: Square) {
-    return square1.row === square2.row && square1.column === square2.column;
+export function isSameLocation(lhs: Square, rhs: Square) {
+    return lhs.row === rhs.row && lhs.column === rhs.column;
+}
+
+
+export default class ChessBoard {
+    squares: (ChessPiece | null)[][]
+    constructor(width: number, height: number) {
+        this.squares = Array.from({ length: height }, () => Array.from({ length: width }, () => null))
+    }
+
+    setBoard(squares: (ChessPiece | null)[][]) {
+        this.squares = squares;
+    }
+
+    getBoard() {
+        return this.squares;
+    }
+
+    getPiece(square: Square) {
+        return this.squares[square.row - 1][square.column - 1];
+    }
+
+    setSquare(square: Square) {
+        this.squares[square.row - 1][square.column - 1] = square.piece ?? null;
+    }
+
+    setPiece(square: Square, piece: ChessPiece | null) {
+        this.squares[square.row - 1][square.column - 1] = piece;
+    }
 }

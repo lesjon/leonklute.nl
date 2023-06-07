@@ -14,8 +14,7 @@
 import { defineComponent, PropType } from 'vue';
 import { rows, columns, Square, isSameLocation, columnLetters } from './chess-board';
 import ChessSquare from './ChessSquare.vue';
-import ChessGame, { EnPassant } from './chess-game';
-import { ChessPiece, FENpieces } from './chess-pieces';
+import ChessGame from './chess-game';
 
 export default defineComponent({
   name: 'ChessBoard',
@@ -42,28 +41,29 @@ export default defineComponent({
   },
   computed: {
     processedRows() {
-      console.log('flipped', this.flipped);
       return this.flipped ? this.rows : this.rows.slice().reverse();
     },
   },
   methods: {
     isSameLocation,
-    onSquareClick(row: number, column: number, piece: ChessPiece | undefined) {
-      console.log(`Clicked on square ${columnLetters[column]}, ${row}`);
-      const enPassant = new EnPassant(this.game?.enPassant || '-');
-      if (this.selectedSquare) {
-        const toSquare = { row, column, piece };
-        if (this.game?.movePieceIfLegal(this.selectedSquare, toSquare, enPassant)) {
-          this.selectedSquare = undefined;
-          this.possibleMoves = [];
-          return;
-        }
+    onSquareClick(square: Square) {
+      if (!this.selectedSquare){
+        this.selectedSquare = square;
+        this.possibleMoves = this.game?.getPossibleMoves(square) || [];
+        return;
       }
-      this.selectedSquare = { row, column, piece };
-      if (piece) {
-        this.possibleMoves = this.game?.getPieceAt(row, column)?.getPossibleMoves({ row, column, piece }, enPassant) || [];
-      } else {
+      if (isSameLocation(this.selectedSquare, square)) {
+        // reset selected square
+        this.selectedSquare = undefined;
         this.possibleMoves = [];
+        return;
+      }
+      if(this.game?.movePieceIfLegal(this.selectedSquare, square)) {
+        this.selectedSquare = undefined;
+        this.possibleMoves = [];
+      } else {
+        this.selectedSquare = square;
+        this.possibleMoves = this.game?.getPossibleMoves(square) || [];
       }
     },
   },

@@ -3,16 +3,15 @@
     <div :style="style" @click="onClick" style="display: grid;">
       <div class="highlight" v-if="highlight" style="grid-column: 1; grid-row: 1;"></div>
       <div class="dot" v-if="selected" style="grid-column: 1; grid-row: 1;"></div>
-      <q-img :src="pieceImageFilename" v-if="piece" style="grid-column: 1; grid-row: 1;" no-spinner/>
+      <q-img loading="eager" :src="pieceImageFilename" v-if="piece" style="grid-column: 1; grid-row: 1;" no-spinner/>
     </div>
   </q-responsive>
 </template>
 
 <script lang="ts">
-import { defineComponent } from 'vue';
+import { defineComponent, PropType } from 'vue';
 import { Square } from './chess-board';
-import { PropType } from 'vue';
-import { ChessPiece } from './chess-pieces';
+import ChessPiece from './chess-pieces';
 
 export default defineComponent({
   name: 'ChessSquare',
@@ -57,8 +56,8 @@ export default defineComponent({
   },
   methods: {
     onClick() {
-      console.log(`Clicked on square ${this.column}, ${this.row}`, this.piece)
-      this.$emit('click', this.row, this.column, this.piece);
+      const square: Square = { row: this.row, column: this.column, piece: this.piece };
+      this.$emit('click', square);
     }
   }
 })
