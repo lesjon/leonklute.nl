@@ -1,4 +1,6 @@
 
+export type PlayerColor = 'w' | 'b';
+
 export enum FENpieces {
     whiteKing = 'K',
     whiteQueen = 'Q',
@@ -98,7 +100,7 @@ export const ChessPieceFromFen = (fenKey: FENpieces): ChessPiece | null => {
 abstract class ChessPieceBase implements ChessPiece {
     fullName: string;
     fenKey: string;
-    color: string;
+    color: PlayerColor;
     moved = false;
     constructor(fenKey: string) {
         this.fullName = fen2FullName(fenKey);

@@ -1,15 +1,14 @@
-import ChessPiece, { ChessPieceFromFen, FENpieces } from './chess-pieces';
+import ChessPiece, { ChessPieceFromFen, FENpieces, PlayerColor } from './chess-pieces';
 import ChessBoard, { rows, columns, Square, columnLetters, isSameLocation } from './chess-board';
-
-
 
 export default class ChessGame {
     start_position_fen = 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1';
-    turn = 'w';
+    turn: PlayerColor = 'w';
     castling = 'KQkq';
     enPassant = new EnPassant('-');
     halfMove = '0';
     fullMove = '1';
+    check = false;
     chessBoard: ChessBoard;
 
     constructor(fen?: string) {
@@ -35,7 +34,7 @@ export default class ChessGame {
     fenParser(fen: string): ChessBoard {
         const fenArray = fen.split(' ');
         const board = fenArray[0];
-        this.turn = fenArray[1];
+        this.turn = fenArray[1] as PlayerColor;
         this.castling = fenArray[2];
         this.enPassant = new EnPassant(fenArray[3]);
         this.halfMove = fenArray[4];
@@ -80,6 +79,7 @@ export default class ChessGame {
         this.chessBoard.setPiece({ row: to.row, column: to.column }, piece);
         this.computeEnPassent(from, to, piece);
         this.turn = this.turn === 'w' ? 'b' : 'w';
+        this.computeCheck();
     }
 
     computeEnPassent(from: Square, to: Square, piece: ChessPiece | null) {
@@ -108,13 +108,13 @@ export default class ChessGame {
             console.info('not your turn');
             return false;
         }
-        const possibleMoves = this.getPossibleMoves(from);
+        const possibleMoves = this.getPossibleMovesFor(from);
         const move: Move | undefined = possibleMoves.find(move => isSameLocation(move, to));
         if (!move) {
             console.info('not a possible move');
             return false;
         }
-        move?.enPassant?.callBack?.();
+        move?.enPassant?.takeCallBack?.();
 
         if (!to.piece) {
             this.movePiece(from, to);
@@ -126,13 +126,14 @@ export default class ChessGame {
         return false;
     }
 
-    getPossibleMoves(from: Square): Move[] {
+    getPossibleMovesFor(from: Square, playerColor?: PlayerColor): Move[] {
         const possibleMoves: Move[] = [];
         const piece = this.getPieceAt(from.row, from.column);
+        playerColor = playerColor || this.turn;
         if (!piece) {
             return possibleMoves;
         }
-        if (piece.getColor() !== this.turn) {
+        if (piece.getColor() !== playerColor) {
             return possibleMoves;
         }
 
@@ -167,6 +168,43 @@ export default class ChessGame {
 
         return possibleMoves;
     }
+
+    getAllSquares(): Square[] {
+        const squares: Square[] = [];
+        rows.forEach(row => {
+            columns.forEach(column => {
+                squares.push({ row, column, piece: this.getPieceAt(row, column) });
+            });
+        });
+        return squares;
+    }
+
+    getAllMoves(color?: PlayerColor): Move[] {
+        const squares = this.getAllSquares();
+        const moves: Move[] = [];
+        squares.forEach(square => {
+            this.getPossibleMovesFor(square, color).forEach(move => {
+                moves.push(move);
+            });
+        });
+        return moves;
+    }
+
+    computeCheck() {
+        let moves = this.getAllMoves(this.turn === 'w' ? 'b' : 'w');
+        const king = this.getKing();
+        if (!king) {
+            return;
+        }
+        moves = moves.filter(move => isSameLocation(move, king));
+        this.check = moves.length > 0;
+    }
+
+    getKing() {
+        const kingToFind = this.turn === 'w' ? 'K' : 'k';
+        return this.getAllSquares().find(square => square.piece?.getFenKey() === kingToFind);
+
+    }
     isWithinBoard(square: Square) {
         return square.row > 0 && square.row < 9 && square.column > 0 && square.column < 9;
     }
@@ -181,10 +219,10 @@ interface Move extends Square {
 export class EnPassant implements Square {
     row: number;
     column: number;
-    callBack?: () => void;
+    takeCallBack?: () => void;
 
-    constructor(enPassentFen: string, callBack?: () => void) {
-        this.callBack = callBack;
+    constructor(enPassentFen: string, takeCallBack?: () => void) {
+        this.takeCallBack = takeCallBack;
         const column = enPassentFen[0];
         const row = enPassentFen[1];
         this.row = Number(row);

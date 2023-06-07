@@ -2,8 +2,10 @@
   <q-responsive ratio="1" class="col" :style="`max-width: ${boardsize}vh;`">
     <div>
       <div class="row" v-for="row in processedRows" :key="row">
-        <chess-square class="col" v-for="column in columns" :key="column" :row="row" :column="column"
-          :selected-square="selectedSquare" :piece="game?.getPieceAt(row, column) || undefined" @click="onSquareClick"
+        <chess-square class="col" v-for="column in processedColumns" :key="column" 
+          :row="row" :column="column" :piece="game?.getPieceAt(row, column) || undefined" 
+          :selected-square="selectedSquare"
+          @click="onSquareClick"
           :highlight="possibleMoves.some(sqr => isSameLocation({ row, column }, sqr))" />
       </div>
     </div>
@@ -12,7 +14,7 @@
 
 <script lang="ts">
 import { defineComponent, PropType } from 'vue';
-import { rows, columns, Square, isSameLocation, columnLetters } from './chess-board';
+import { rows, columns, Square, isSameLocation } from './chess-board';
 import ChessSquare from './ChessSquare.vue';
 import ChessGame from './chess-game';
 
@@ -43,13 +45,16 @@ export default defineComponent({
     processedRows() {
       return this.flipped ? this.rows : this.rows.slice().reverse();
     },
+    processedColumns() {
+      return this.flipped ? this.columns.slice().reverse() : this.columns;
+    },
   },
   methods: {
     isSameLocation,
     onSquareClick(square: Square) {
       if (!this.selectedSquare){
         this.selectedSquare = square;
-        this.possibleMoves = this.game?.getPossibleMoves(square) || [];
+        this.possibleMoves = this.game?.getPossibleMovesFor(square) || [];
         return;
       }
       if (isSameLocation(this.selectedSquare, square)) {
@@ -63,7 +68,7 @@ export default defineComponent({
         this.possibleMoves = [];
       } else {
         this.selectedSquare = square;
-        this.possibleMoves = this.game?.getPossibleMoves(square) || [];
+        this.possibleMoves = this.game?.getPossibleMovesFor(square) || [];
       }
     },
   },

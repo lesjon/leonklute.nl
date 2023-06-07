@@ -1,16 +1,17 @@
 <template>
   <q-responsive ratio="1">
     <div :style="style" @click="onClick" style="display: grid;">
-      <div class="highlight" v-if="highlight" style="grid-column: 1; grid-row: 1;"></div>
-      <div class="dot" v-if="selected" style="grid-column: 1; grid-row: 1;"></div>
-      <q-img loading="eager" :src="pieceImageFilename" v-if="piece" style="grid-column: 1; grid-row: 1;" no-spinner/>
+      <q-img loading="eager" :src="pieceImageFilename" v-if="piece" class="on-square" no-spinner/>
+      <div class="highlight on-square" v-if="highlight" style="grid-column: 1; grid-row: 1;"></div>
+      <div class="dot on-square" v-if="selected" style="grid-column: 1; grid-row: 1;"></div>
+      <span class="on-square">{{ columnLetters[column] }}{{ row }}</span>
     </div>
   </q-responsive>
 </template>
 
 <script lang="ts">
 import { defineComponent, PropType } from 'vue';
-import { Square } from './chess-board';
+import { Square, columnLetters } from './chess-board';
 import ChessPiece from './chess-pieces';
 
 export default defineComponent({
@@ -38,6 +39,11 @@ export default defineComponent({
     },
   },
   emits: ['click'],
+  data() {
+    return {
+      columnLetters,
+    };
+  },
   computed: {
     backgroundColor() {
       return (this.column + this.row) % 2 === 0 ? '#EFEFEF' : '#b58863';
@@ -74,4 +80,8 @@ export default defineComponent({
   width: inherit
   border-radius: 50%
   border: 10px solid #5b5
+
+.on-square
+  grid-column: 1
+  grid-row: 1
 </style>
