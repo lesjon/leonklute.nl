@@ -5,6 +5,10 @@ export enum Level {
     Expert = 'E'
 }
 
+export const LevelToOrdinal = (value: Level) => {
+  return Object.values(Level).indexOf(value);
+}
+
 export const LevelFormatter = (value: Level) => {
     switch (value) {
       case Level.Junior:
