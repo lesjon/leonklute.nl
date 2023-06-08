@@ -1,5 +1,6 @@
 import ChessPiece, { ChessPieceFromFen, FENpieces, PlayerColor } from './chess-pieces';
 import ChessBoard, { rows, columns, Square, columnLetters, isSameLocation } from './chess-board';
+import Player from './player';
 
 export default class ChessGame {
     start_position_fen = 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1';
@@ -10,6 +11,8 @@ export default class ChessGame {
     fullMove = '1';
     check = false;
     chessBoard: ChessBoard;
+    whitePlayer?: Player;
+    blackPlayer?: Player;
 
     constructor(fen?: string) {
         if (fen) {
@@ -17,6 +20,9 @@ export default class ChessGame {
         } else {
             this.chessBoard = this.getNewGame();
         }
+        this.blackPlayer = new Player('black');
+        this.whitePlayer = new Player('white');
+        this.blackPlayer.title = 'GM';
     }
 
     public newGame() {

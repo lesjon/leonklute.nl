@@ -1,6 +1,6 @@
 <template>
   <q-page padding class="row justify-center q-gutter-lg">
-    <chess-board :game="game" :flipped="flipped" class="col-12" />
+    <chess-board :game="game" :flipped="flipped" class="col-12"/>
     <chess-controls :game="game" @flip="flipped = !flipped" style="max-width: 90vw;" />
   </q-page>
 </template>

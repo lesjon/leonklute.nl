@@ -1,6 +1,7 @@
 <template>
-  <q-responsive ratio="1" class="col" :style="`max-width: ${boardsize}vh;`">
+  <q-responsive :ratio="8/9" class="col" :style="`max-width: ${boardsize}vh;`">
     <div>
+      <player-card class="row" :game="game" :color="flipped? 'w' : 'b'"/>
       <div class="row" v-for="row in processedRows" :key="row">
         <chess-square class="col" v-for="column in processedColumns" :key="column" 
           :row="row" :column="column" :piece="game?.getPieceAt(row, column) || undefined" 
@@ -8,6 +9,7 @@
           @click="onSquareClick"
           :highlight="possibleMoves.some(sqr => isSameLocation({ row, column }, sqr))" />
       </div>
+      <player-card class="row" :game="game" :color="flipped? 'b' : 'w'"/>
     </div>
   </q-responsive>
 </template>
@@ -17,11 +19,12 @@ import { defineComponent, PropType } from 'vue';
 import { rows, columns, Square, isSameLocation } from './chess-board';
 import ChessSquare from './ChessSquare.vue';
 import ChessGame from './chess-game';
+import PlayerCard from './PlayerCard.vue';
 
 export default defineComponent({
   name: 'ChessBoard',
   components: {
-    ChessSquare,
+    ChessSquare, PlayerCard
   },
   props: {
     game: {
@@ -36,7 +39,7 @@ export default defineComponent({
     return {
       rows,
       columns,
-      boardsize: 80,
+      boardsize: 70,
       selectedSquare: undefined as Square | undefined,
       possibleMoves: [] as Square[],
     };
