@@ -166,6 +166,7 @@ export default class ChessGame {
                 }
                 possibleMoves.push(nextMove);
                 if (attackedPiece) {
+                    nextMove.takes = attackedPiece;
                     break;
                 }
             }
@@ -218,10 +219,13 @@ export default class ChessGame {
     }
 }
 
-interface Move extends Square {
+export interface Move extends Square {
     piece: ChessPiece;
+    takes?: ChessPiece;
     enPassant?: EnPassant;
     from?: Square;
+    check?: boolean;
+    checkmate?: boolean;
 }
 
 
