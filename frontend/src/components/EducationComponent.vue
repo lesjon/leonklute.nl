@@ -43,12 +43,18 @@ export default defineComponent({
   },
   computed: {
     educations(): Education[] {
-      return this.educationAndCourses.filter((educationAndCourse) => educationAndCourse.hasOwnProperty('Profiel opl naam')) as Education[]
+      const filterMethod = (educationAndCourse: Education | Course): educationAndCourse is Education => {
+        return educationAndCourse.hasOwnProperty('Profiel opl naam')
+      }
+      const filtered = this.educationAndCourses.filter(filterMethod);
+      return filtered.sort((a, b) => {
+        return a['Profiel opl eind'] > b['Profiel opl eind'] ? -1 : 1
+      })
     }
   },
   methods: {
     async fetchExperiences() {
-      this.$api.get('/resume/files//education.json')
+      this.$api.get('/resume/files/education.json')
         .then((response) => {
           this.educationAndCourses = response.data
         })

@@ -1,11 +1,11 @@
 <template>
-  <q-table :rows="technologies" :columns="COLUMNS" title="Technologieën" :rows-per-page-options="[0, 10, 20, 50]"/>
+  <q-table :rows="sortedTechnologies" :columns="COLUMNS" title="Technologieën" :rows-per-page-options="[0, 10, 20, 50]"/>
 </template>
 
 <script lang="ts">
 import { QTableColumn } from 'quasar';
 import { defineComponent } from 'vue';
-import { Level, LevelFormatter } from './models';
+import { Level, LevelFormatter, LevelToOrdinal } from './models';
 
 interface Technology {
   'Waarde': string, 
@@ -37,6 +37,15 @@ export default defineComponent({
   },
   mounted() {
     this.fetchTechnologies()
+  },
+  computed: {
+    sortedTechnologies(): Technology[] {
+      return this.technologies.slice().sort((a, b) => {
+        const aIndex = LevelToOrdinal(a['Level ( J / M / S / E )']);
+        const bIndex = LevelToOrdinal(b['Level ( J / M / S / E )']);
+        return  bIndex - aIndex;
+      })
+    }
   },
   methods: {
     async fetchTechnologies() {
