@@ -20,6 +20,12 @@ interface Course {
   'Profiel cur eind': string
 }
 
+
+
+const sortByCompleted = (a: Course, b: Course) => {
+  return b['Profiel cur eind'].localeCompare(a['Profiel cur eind']);
+}
+
 const COLUMNS: QTableColumn[] = [
   {
     name: 'Profiel cur naam',
@@ -34,7 +40,7 @@ const COLUMNS: QTableColumn[] = [
     field: 'Profiel cur certificaat',
     align: 'left',
     sortable: true,
-    format: (value: string) => value == '1' ? 'Behaald' : value == '0' ? 'Niet behaald' : 'N/A'
+    format: (value: string) => value === '1' ? 'Behaald' : value === '0' ? 'Nee' : 'N/A'
   },
   {
     name: 'Profiel cur eind',
@@ -57,7 +63,10 @@ export default defineComponent({
   },
   computed: {
     courses(): Course[] {
-      return this.educationAndCourses.filter((educationAndCourse) => educationAndCourse.hasOwnProperty('Profiel cur naam')) as Course[]
+      const courses = this.educationAndCourses.filter((educationAndCourse) => educationAndCourse.hasOwnProperty('Profiel cur naam')) as Course[];
+      const sortedCourses = courses.sort(sortByCompleted);
+      console.log(sortedCourses);
+      return sortedCourses;
     }
   },
   methods: {

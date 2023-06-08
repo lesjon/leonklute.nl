@@ -8,9 +8,9 @@ declare module '@vue/runtime-core' {
   }
 }
 
-let baseURL = "https://api.leonklute.nl";
+let baseURL = 'https://api.leonklute.nl';
 if(process.env.NODE_ENV === 'development') {
-  baseURL = "/resumeproxy";
+  baseURL = '/resumeproxy';
 }
 
 const api = axios.create({ baseURL });
