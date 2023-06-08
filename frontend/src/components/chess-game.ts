@@ -1,80 +1,80 @@
-import ChessPiece, { ChessPieceFromFen, FENpieces, PlayerColor } from './chess-pieces';
+import ChessPiece, { PlayerColor } from './chess-pieces';
 import ChessBoard, { rows, columns, Square, columnLetters, isSameLocation } from './chess-board';
 import Player from './player';
 
+class MoveNode {
+    move: Move;
+    children: MoveNode[];
+    constructor(move: Move) {
+        this.move = move;
+        this.children = [];
+    }
+    getMove() {
+        return this.move;
+    }
+    getChildren() {
+        return this.children;
+    }
+    addChild(moveNode: MoveNode) {
+        this.children.push(moveNode);
+    }
+    getNextMainLine() {
+        return this.children.at(0);
+    }
+
+    getMainLine() {
+        const mainLine: Move[] = [this.move];
+        let currentNode: MoveNode | undefined = this.getNextMainLine();
+        while (currentNode) {
+            mainLine.push(currentNode.move);
+            currentNode = currentNode.getNextMainLine();
+        }
+        return mainLine;
+    }
+}
+
 export default class ChessGame {
-    start_position_fen = 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1';
     turn: PlayerColor = 'w';
     castling = 'KQkq';
     enPassant = new EnPassant('-');
     halfMove = '0';
     fullMove = '1';
     check = false;
-    chessBoard: ChessBoard;
+    chessBoard: ChessBoard = new ChessBoard(8, 8);
     whitePlayer?: Player;
     blackPlayer?: Player;
 
+    moveTree: MoveNode[] = [];
+    currentMoveNode: MoveNode | undefined = undefined;
+
     constructor(fen?: string) {
-        if (fen) {
-            this.chessBoard = this.fenParser(fen);
-        } else {
-            this.chessBoard = this.getNewGame();
-        }
         this.blackPlayer = new Player('black');
         this.whitePlayer = new Player('white');
         this.blackPlayer.title = 'GM';
     }
 
-    public newGame() {
-        this.chessBoard = this.getNewGame();
+    getMainLine() {
+        return this.moveTree.at(0)?.getMainLine();
     }
 
-    getNewGame() {
-        return this.fenParser(this.start_position_fen);
+    getCurrentMoveNode() {
+        return this.currentMoveNode?.getMainLine().at(-1);
     }
-
+    
     getPieceAt(row: number, column: number) {
         return this.chessBoard.getPiece({ row, column });
     }
 
-    fenParser(fen: string): ChessBoard {
-        const fenArray = fen.split(' ');
-        const board = fenArray[0];
-        this.turn = fenArray[1] as PlayerColor;
-        this.castling = fenArray[2];
-        this.enPassant = new EnPassant(fenArray[3]);
-        this.halfMove = fenArray[4];
-        this.fullMove = fenArray[5];
-        const boardArray = board.split('/').reverse();
-        const chessBoard = new ChessBoard(8, 8);
-        const board2DArray = boardArray.map(row => {
-            const rowArray = row.split('');
-            const row2DArray = rowArray.map(cell => {
-                if (isNaN(Number(cell))) {
-                    return ChessPieceFromFen(cell as FENpieces);
-                } else {
-                    return Array.from({ length: Number(cell) }, () => null);
-                }
-            });
-            return row2DArray.flat();
-        });
-        chessBoard.setBoard(board2DArray);
-        return chessBoard;
-    }
-
-    toFen() {
-        const boardArray = this.chessBoard.getBoard().map(row => {
-            const rowArray = row.map(cell => {
-                if (cell) {
-                    return cell.getFenKey();
-                } else {
-                    return '1';
-                }
-            });
-             return rowArray.join('').replace(/1+/g, (match, p1) => match.length.toString());
-        });
-        const board = boardArray.reverse().join('/');
-        return `${board} ${this.turn} ${this.castling} ${this.enPassant.toFen()} ${this.halfMove} ${this.fullMove}`;
+    move(move: Move) {
+        this.movePiece(move.from!, move);
+        const moveNode = new MoveNode(move);
+        if (this.currentMoveNode) {
+            this.currentMoveNode?.addChild(moveNode);
+            this.currentMoveNode = moveNode;
+        } else {
+            this.moveTree.push(moveNode);
+            this.currentMoveNode = moveNode;
+        }
     }
 
     movePiece(from: Square, to: Square) {
@@ -122,10 +122,10 @@ export default class ChessGame {
         move?.enPassant?.takeCallBack?.();
 
         if (!to.piece) {
-            this.movePiece(from, to);
+            this.move(move);
             return true;
         } else if (from.piece.isOpponent(to.piece)) {
-            this.movePiece(from, to);
+            this.move(move);
             return true;
         }
         return false;
@@ -145,7 +145,7 @@ export default class ChessGame {
         piece.getChessPieceSteps().forEach(step => {
             const maxDistance = Math.max(rows.length, columns.length);
             for (let i = 0; i < (step.limit || maxDistance); i++) {
-                const nextMove: Move = { row: from.row + ((i + 1) * step.row), column: from.column + ((i + 1) * step.column), piece: piece };
+                const nextMove: Move = { row: from.row + ((i + 1) * step.row), column: from.column + ((i + 1) * step.column), piece: piece, from };
                 if (!this.isWithinBoard(nextMove)) {
                     break;
                 }
@@ -221,6 +221,7 @@ export default class ChessGame {
 interface Move extends Square {
     piece: ChessPiece;
     enPassant?: EnPassant;
+    from?: Square;
 }
 
 
