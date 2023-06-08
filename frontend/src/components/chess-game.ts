@@ -65,8 +65,7 @@ export default class ChessGame {
                     return '1';
                 }
             });
-            //  TODO: sum 1s into a number
-            return rowArray.join('');
+             return rowArray.join('').replace(/1+/g, (match, p1) => match.length.toString());
         });
         const board = boardArray.reverse().join('/');
         return `${board} ${this.turn} ${this.castling} ${this.enPassant.toFen()} ${this.halfMove} ${this.fullMove}`;
@@ -198,6 +197,9 @@ export default class ChessGame {
         }
         moves = moves.filter(move => isSameLocation(move, king));
         this.check = moves.length > 0;
+        if (this.check) {
+            console.info('check');
+        }
     }
 
     getKing() {
