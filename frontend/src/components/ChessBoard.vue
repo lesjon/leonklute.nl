@@ -43,7 +43,7 @@ export default defineComponent({
     return {
       rows,
       columns,
-      boardsize: 40,
+      boardsize: 60,
       selectedSquare: undefined as Square | undefined,
       possibleMoves: [] as Square[]
     };

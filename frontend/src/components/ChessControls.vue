@@ -8,26 +8,25 @@
       <q-input outlined readonly dense :model-value="fen" />
     </q-card-section>
     <q-card-section>
-      <span v-for="move in mainLine" :key="move.index">
-        {{ pieceSymbol(move.move) + takeSymbol(move.move) +
-          columnLetters[move.move.column] + move.move.row + checkSymbol(move.move) }}
-        <br v-if="move.index % 2"><span v-else>&nbsp;</span>
-      </span>
+      <q-table :rows="mainLine" :columns="COLUMNS" :rows-per-page-options="[0]" hide-pagination/>
     </q-card-section>
   </q-card>
 </template>
 
 <script lang="ts">
-import { copyToClipboard } from 'quasar';
+import { copyToClipboard, QTableColumn } from 'quasar';
 import { defineComponent, PropType } from 'vue';
 import ChessGame, { Move } from './chess-game';
 import Fen from './fen';
+import San from './san';
 import { columnLetters } from './chess-board';
 
-interface MoveWithIndex {
+interface MovesWithIndex {
   index: number;
-  move: Move;
+  moveWhite: Move;
+  moveBlack: Move;
 }
+
 
 export default defineComponent({
   name: 'ChessControls',
@@ -38,8 +37,33 @@ export default defineComponent({
   },
   emits: ['flip', 'new-game'],
   data() {
+    const san: San = new San();
     return {
       columnLetters,
+      COLUMNS: [
+        {
+          name: 'index',
+          label: '#',
+          field: 'index',
+          align: 'left',
+          style: 'width: 3ch',
+        },
+        {
+          name: 'moveWhite',
+          label: 'White',
+          field: 'moveWhite',
+          align: 'left',
+          format: (move) => san.formatMove(move)
+        },
+        {
+          name: 'moveBlack',
+          label: 'Black',
+          field: 'moveBlack',
+          align: 'left',
+          format: (move) => san.formatMove(move)
+        },
+      ] as QTableColumn[],
+      san
     };
   },
   computed: {
@@ -49,11 +73,17 @@ export default defineComponent({
       }
       return Fen.toFen(this.game);
     },
-    mainLine(): MoveWithIndex[] {
-      if (!this.game) {
-        return [];
+    mainLine(): MovesWithIndex[] {
+      const indexedMoves = this.game?.getMainLine()?.map((move, index) => { return { index, move } }) ?? [];
+      const movesWithIndex: MovesWithIndex[] = [];
+      for (let i = 0; i < indexedMoves.length; i += 2) {
+        movesWithIndex.push({
+          index: (indexedMoves[i].index / 2) + 1,
+          moveWhite: indexedMoves[i].move,
+          moveBlack: indexedMoves[i + 1]?.move,
+        });
       }
-      return this.game.getMainLine()?.map((move, index) => { return { index, move } }) ?? [];
+      return movesWithIndex;
     }
   },
   methods: {
@@ -74,47 +104,7 @@ export default defineComponent({
           color: 'positive',
         })
       }).catch(this.failedToCopy);
-    },
-    pieceSymbol(move: Move) {
-      const piece = move.piece;
-      switch (piece.getFenKey()) {
-        case 'p':
-        case 'P':
-          if (move.takes && move.from) { return columnLetters[move.from?.column]; }
-          return '';
-        case 'N':
-          return '♘';
-        case 'B':
-          return '♗';
-        case 'R':
-          return '♖';
-        case 'Q':
-          return '♕';
-        case 'K':
-          return '♔';
-        case 'n':
-          return '♞';
-        case 'b':
-          return '♝';
-        case 'r':
-          return '♜';
-        case 'q':
-          return '♛';
-        case 'k':
-          return '♚';
-        default:
-          return '';
-      };
-    },
-    checkSymbol(move: Move) {
-      if (move.check) {
-        return move.checkmate ? '#' : '+';
-      }
-      return '';
-    },
-    takeSymbol(move: Move) {
-      return move.takes ? 'x' : '';
-    },
+    }
   },
 })
 </script>

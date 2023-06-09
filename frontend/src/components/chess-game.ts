@@ -60,7 +60,7 @@ export default class ChessGame {
     getCurrentMoveNode() {
         return this.currentMoveNode?.getMainLine().at(-1);
     }
-    
+
     getPieceAt(row: number, column: number) {
         return this.chessBoard.getPiece({ row, column });
     }
@@ -91,13 +91,12 @@ export default class ChessGame {
         const rowDelta = to.row - from.row;
         this.enPassant = new EnPassant('-');
         if (piece?.getFenKey().toLowerCase() === 'p') {
-            const removePawnCallback = () => this.chessBoard.setPiece(to, null);
             switch (rowDelta) {
                 case 2:
-                    this.enPassant = new EnPassant(`${columnLetters[to.column]}${to.row - 1}`, removePawnCallback);
+                    this.enPassant = new EnPassant(`${columnLetters[to.column]}${to.row - 1}`, to);
                     break;
                 case -2:
-                    this.enPassant = new EnPassant(`${columnLetters[to.column]}${to.row + 1}`, removePawnCallback);
+                    this.enPassant = new EnPassant(`${columnLetters[to.column]}${to.row + 1}`, to);
                     break;
             }
         }
@@ -119,8 +118,9 @@ export default class ChessGame {
             console.info('not a possible move');
             return false;
         }
-        move?.enPassant?.takeCallBack?.();
-
+        if (move.enPassant?.squareToTake) {
+            this.chessBoard.setPiece(move.enPassant.squareToTake, null);
+        }
         if (!to.piece) {
             this.move(move);
             return true;
@@ -160,12 +160,13 @@ export default class ChessGame {
                 const canEnPassant = isSameLocation(enPassant, nextMove);
                 if (canEnPassant && step.allowsEnPassant) {
                     nextMove.enPassant = enPassant;
+                    nextMove.takes = enPassant.squareToTake?.piece ?? undefined;
                 }
                 if (!(attackedPiece || canEnPassant) && step.requiresTake) {
                     break;
                 }
                 possibleMoves.push(nextMove);
-                if (attackedPiece) {
+                if (attackedPiece ) {
                     nextMove.takes = attackedPiece;
                     break;
                 }
@@ -232,10 +233,10 @@ export interface Move extends Square {
 export class EnPassant implements Square {
     row: number;
     column: number;
-    takeCallBack?: () => void;
+    squareToTake?: Square;
 
-    constructor(enPassentFen: string, takeCallBack?: () => void) {
-        this.takeCallBack = takeCallBack;
+    constructor(enPassentFen: string, squareToTake?: Square) {
+        this.squareToTake = squareToTake;
         const column = enPassentFen[0];
         const row = enPassentFen[1];
         this.row = Number(row);
