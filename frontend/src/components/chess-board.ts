@@ -53,4 +53,8 @@ export default class ChessBoard {
     setPiece(square: Square, piece: ChessPiece | null) {
         this.squares[square.row - 1][square.column - 1] = piece;
     }
+
+    clone(): ChessBoard {
+        return Object.assign(Object.create(Object.getPrototypeOf(this)), this);
+    }
 }

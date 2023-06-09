@@ -66,7 +66,10 @@ export default class ChessGame {
     }
 
     move(move: Move) {
-        this.movePiece(move.from!, move);
+        const newPosition = this.movePiece(this.chessBoard, move.from!, move);
+        this.enPassant = this.computeEnPassent(move);
+        this.turn = this.turn === 'w' ? 'b' : 'w';
+        this.computeCheck();
         const moveNode = new MoveNode(move);
         if (this.currentMoveNode) {
             this.currentMoveNode?.addChild(moveNode);
@@ -77,30 +80,33 @@ export default class ChessGame {
         }
     }
 
-    movePiece(from: Square, to: Square) {
-        const piece = this.getPieceAt(from.row, from.column);
+    private movePiece(chessBoard: ChessBoard, from: Square, to: Square) {
+        const newChessBoard = chessBoard.clone();
+        const piece = newChessBoard.getPiece(from);
         piece?.setMoved();
-        this.chessBoard.setSquare({ row: from.row, column: from.column, piece: null });
-        this.chessBoard.setPiece({ row: to.row, column: to.column }, piece);
-        this.computeEnPassent(from, to, piece);
-        this.turn = this.turn === 'w' ? 'b' : 'w';
-        this.computeCheck();
+        newChessBoard.setSquare({ row: from.row, column: from.column, piece: null });
+        newChessBoard.setPiece({ row: to.row, column: to.column }, piece);
+        return newChessBoard;
     }
 
-    computeEnPassent(from: Square, to: Square, piece: ChessPiece | null) {
-        const rowDelta = to.row - from.row;
-        this.enPassant = new EnPassant('-');
+    computeEnPassent(move: Move) {
+        const {from, row, column, piece} = move;
+        let enPassant = new EnPassant('-');
+        if (!from) {
+            return enPassant;
+        }
+        const rowDelta = row - from.row;
         if (piece?.getFenKey().toLowerCase() === 'p') {
             switch (rowDelta) {
                 case 2:
-                    this.enPassant = new EnPassant(`${columnLetters[to.column]}${to.row - 1}`, to);
+                    enPassant = new EnPassant(`${columnLetters[column]}${row - 1}`, move);
                     break;
                 case -2:
-                    this.enPassant = new EnPassant(`${columnLetters[to.column]}${to.row + 1}`, to);
+                    enPassant = new EnPassant(`${columnLetters[column]}${row + 1}`, move);
                     break;
             }
         }
-
+        return enPassant;
     }
 
     movePieceIfLegal(from: Square, to: Square) {

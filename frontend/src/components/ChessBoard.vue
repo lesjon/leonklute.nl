@@ -79,7 +79,6 @@ export default defineComponent({
       }
     },
     moveFab(details: { evt: Event, delta: { x: number, y: number } }) {
-      console.log(details);
       this.boardsize = Math.min(Math.max(this.boardsize + details.delta.x / 10, 20), 100);
     },
   },
