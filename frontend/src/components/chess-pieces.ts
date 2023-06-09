@@ -54,6 +54,8 @@ interface ChessPieceStep {
     requiresTake?: boolean;
     excludesTake?: boolean;
     allowsEnPassant?: boolean;
+    shortCastle?: boolean;
+    longCastle?: boolean;
 }
 
 export default interface ChessPiece {
@@ -142,7 +144,8 @@ class King extends ChessPieceBase {
         super(fenKey);
     }
     getChessPieceSteps(): ChessPieceStep[] {
-        return [{ row: 0, column: 1, limit: 1 }, { row: -1, column: 1, limit: 1 }, { row: -1, column: 0, limit: 1 }, { row: -1, column: -1, limit: 1 }, { row: 0, column: -1, limit: 1 }, { row: 1, column: -1, limit: 1 }, { row: 1, column: 0, limit: 1 }, { row: 1, column: 1, limit: 1 }];
+        const castling: ChessPieceStep[] = [{ row: 0, column: 2, limit: 1, shortCastle: true }, { row: 0, column: -2, limit: 1, longCastle: true }];
+        return [...castling, { row: 0, column: 1, limit: 1 }, { row: -1, column: 1, limit: 1 }, { row: -1, column: 0, limit: 1 }, { row: -1, column: -1, limit: 1 }, { row: 0, column: -1, limit: 1 }, { row: 1, column: -1, limit: 1 }, { row: 1, column: 0, limit: 1 }, { row: 1, column: 1, limit: 1 }];
     }
 }
 class Queen extends ChessPieceBase {
