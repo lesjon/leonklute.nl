@@ -1,4 +1,4 @@
-import ChessPiece from './chess-pieces';
+import ChessPiece, { ChessPieceType, PlayerColor } from './chess-pieces';
 
 // define rows as 1 to 8
 export const rows = Array.from({ length: 8 }, (_, i) => i + 1);
@@ -56,5 +56,30 @@ export default class ChessBoard {
 
     clone(): ChessBoard {
         return Object.assign(Object.create(Object.getPrototypeOf(this)), this);
+    }
+
+    getAllSquares(): Square[] {
+        const squares: Square[] = [];
+        rows.forEach(row => {
+            columns.forEach(column => {
+                squares.push({ row, column, piece: this.squares[row-1][column-1] });
+            });
+        });
+        return squares;
+    }
+
+    getPieces(pieceType: ChessPieceType): Square[] {
+        return this.getAllSquares()
+            .filter(square => square.piece)
+            .filter(square => square.piece?.getType() === pieceType);
+    }
+
+    getKing(color?: PlayerColor): Square | undefined {
+        const kingToFind = color === 'w' ? ChessPieceType.whiteKing : ChessPieceType.blackKing;
+        return this.getPieces(kingToFind).find(square => square.piece?.getType() === kingToFind);
+    }
+
+    isWithinBoard(square: Square) {
+        return square.row > 0 && square.row < 9 && square.column > 0 && square.column < 9;
     }
 }

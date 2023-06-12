@@ -1,46 +1,50 @@
+import { pieceToFen } from "./fen";
 
 export type PlayerColor = 'w' | 'b';
 
-export enum FENpieces {
-    whiteKing = 'K',
-    whiteQueen = 'Q',
-    whiteRook = 'R',
-    whiteBishop = 'B',
-    whiteKnight = 'N',
-    whitePawn = 'P',
-    blackKing = 'k',
-    blackQueen = 'q',
-    blackRook = 'r',
-    blackBishop = 'b',
-    blackKnight = 'n',
-    blackPawn = 'p',
+export enum ChessPieceType {
+    whiteKing,
+    whiteQueen,
+    whiteRook,
+    whiteBishop,
+    whiteKnight,
+    whitePawn,
+    blackKing,
+    blackQueen,
+    blackRook,
+    blackBishop,
+    blackKnight,
+    blackPawn,
 }
 
-export const fen2FullName = (fen: string) => {
-    switch (fen) {
-        case FENpieces.whiteKing:
+const whitePieces = new Set([ChessPieceType.whiteKing, ChessPieceType.whiteQueen, ChessPieceType.whiteRook, ChessPieceType.whiteBishop, ChessPieceType.whiteKnight, ChessPieceType.whitePawn])
+export const isWhite = (piece: ChessPieceType) => whitePieces.has(piece);
+
+export const type2FullName = (pieceType: ChessPieceType) => {
+    switch (pieceType) {
+        case ChessPieceType.whiteKing:
             return 'king_white';
-        case FENpieces.whiteQueen:
+        case ChessPieceType.whiteQueen:
             return 'queen_white';
-        case FENpieces.whiteRook:
+        case ChessPieceType.whiteRook:
             return 'rook_white';
-        case FENpieces.whiteBishop:
+        case ChessPieceType.whiteBishop:
             return 'bishop_white';
-        case FENpieces.whiteKnight:
+        case ChessPieceType.whiteKnight:
             return 'knight_white';
-        case FENpieces.whitePawn:
+        case ChessPieceType.whitePawn:
             return 'pawn_white';
-        case FENpieces.blackKing:
+        case ChessPieceType.blackKing:
             return 'king_black';
-        case FENpieces.blackQueen:
+        case ChessPieceType.blackQueen:
             return 'queen_black';
-        case FENpieces.blackRook:
+        case ChessPieceType.blackRook:
             return 'rook_black';
-        case FENpieces.blackBishop:
+        case ChessPieceType.blackBishop:
             return 'bishop_black';
-        case FENpieces.blackKnight:
+        case ChessPieceType.blackKnight:
             return 'knight_black';
-        case FENpieces.blackPawn:
+        case ChessPieceType.blackPawn:
             return 'pawn_black';
         default:
             return 'empty';
@@ -60,40 +64,41 @@ interface ChessPieceStep {
 
 export default interface ChessPiece {
     getFullName(): string;
-    getFenKey(): string;
+    getType(): ChessPieceType;
     getColor(): string;
     isOpponent(piece: ChessPiece): boolean;
     getChessPieceSteps(): ChessPieceStep[];
     hasMoved(): boolean;
     setMoved(): void;
+    toFen(): string;
 }
 
-export const ChessPieceFromFen = (fenKey: FENpieces): ChessPiece | null => {
-    switch (fenKey) {
-        case FENpieces.whiteKing:
-            return new King(fenKey);
-        case FENpieces.whiteQueen:
-            return new Queen(fenKey);
-        case FENpieces.whiteRook:
-            return new Rook(fenKey);
-        case FENpieces.whiteBishop:
-            return new Bishop(fenKey);
-        case FENpieces.whiteKnight:
-            return new Knight(fenKey);
-        case FENpieces.whitePawn:
-            return new Pawn(fenKey);
-        case FENpieces.blackKing:
-            return new King(fenKey);
-        case FENpieces.blackQueen:
-            return new Queen(fenKey);
-        case FENpieces.blackRook:
-            return new Rook(fenKey);
-        case FENpieces.blackBishop:
-            return new Bishop(fenKey);
-        case FENpieces.blackKnight:
-            return new Knight(fenKey);
-        case FENpieces.blackPawn:
-            return new Pawn(fenKey);
+export const ChessPieceFromType = (pieceType: ChessPieceType): ChessPiece | null => {
+    switch (pieceType) {
+        case ChessPieceType.whiteKing:
+            return new King(pieceType);
+        case ChessPieceType.whiteQueen:
+            return new Queen(pieceType);
+        case ChessPieceType.whiteRook:
+            return new Rook(pieceType);
+        case ChessPieceType.whiteBishop:
+            return new Bishop(pieceType);
+        case ChessPieceType.whiteKnight:
+            return new Knight(pieceType);
+        case ChessPieceType.whitePawn:
+            return new Pawn(pieceType);
+        case ChessPieceType.blackKing:
+            return new King(pieceType);
+        case ChessPieceType.blackQueen:
+            return new Queen(pieceType);
+        case ChessPieceType.blackRook:
+            return new Rook(pieceType);
+        case ChessPieceType.blackBishop:
+            return new Bishop(pieceType);
+        case ChessPieceType.blackKnight:
+            return new Knight(pieceType);
+        case ChessPieceType.blackPawn:
+            return new Pawn(pieceType);
         default:
             return null;
     }
@@ -101,19 +106,19 @@ export const ChessPieceFromFen = (fenKey: FENpieces): ChessPiece | null => {
 
 abstract class ChessPieceBase implements ChessPiece {
     fullName: string;
-    fenKey: string;
+    pieceType: ChessPieceType;
     color: PlayerColor;
     moved = false;
-    constructor(fenKey: string) {
-        this.fullName = fen2FullName(fenKey);
-        this.fenKey = fenKey;
-        this.color = fenKey === fenKey.toUpperCase() ? 'w' : 'b';
+    constructor(pieceType: ChessPieceType) {
+        this.fullName = type2FullName(pieceType);
+        this.pieceType = pieceType;
+        this.color = isWhite(pieceType) ? 'w' : 'b';
     }
     getFullName(): string {
         return this.fullName;
     }
-    getFenKey(): string {
-        return this.fenKey;
+    getType(): ChessPieceType {
+        return this.pieceType;
     }
     getColor(): string {
         return this.color;
@@ -128,10 +133,15 @@ abstract class ChessPieceBase implements ChessPiece {
         this.moved = true;
     }
     abstract getChessPieceSteps(): ChessPieceStep[];
+
+    toFen(): string {
+        return pieceToFen(this.pieceType);
+    }
+
 }
 
 class Rook extends ChessPieceBase {
-    constructor(fenKey: string) {
+    constructor(fenKey: ChessPieceType) {
         super(fenKey);
     }
 
@@ -140,7 +150,7 @@ class Rook extends ChessPieceBase {
     }
 }
 class King extends ChessPieceBase {
-    constructor(fenKey: string) {
+    constructor(fenKey: ChessPieceType) {
         super(fenKey);
     }
     getChessPieceSteps(): ChessPieceStep[] {
@@ -149,7 +159,7 @@ class King extends ChessPieceBase {
     }
 }
 class Queen extends ChessPieceBase {
-    constructor(fenKey: string) {
+    constructor(fenKey: ChessPieceType) {
         super(fenKey);
     }
     getChessPieceSteps(): ChessPieceStep[] {
@@ -157,7 +167,7 @@ class Queen extends ChessPieceBase {
     }
 }
 class Knight extends ChessPieceBase {
-    constructor(fenKey: string) {
+    constructor(fenKey: ChessPieceType) {
         super(fenKey);
     }
     getChessPieceSteps(): ChessPieceStep[] {
@@ -166,7 +176,7 @@ class Knight extends ChessPieceBase {
 }
 
 class Bishop extends ChessPieceBase {
-    constructor(fenKey: string) {
+    constructor(fenKey: ChessPieceType) {
         super(fenKey);
     }
     getChessPieceSteps(): ChessPieceStep[] {
@@ -175,7 +185,7 @@ class Bishop extends ChessPieceBase {
 }
 
 class Pawn extends ChessPieceBase {
-    constructor(fenKey: string) {
+    constructor(fenKey: ChessPieceType) {
         super(fenKey);
     }
 

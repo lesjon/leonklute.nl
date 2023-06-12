@@ -63,7 +63,7 @@ export default class ChessGame {
     moveTree: MoveNode[] = [];
     currentMoveNode: MoveNode | undefined = undefined;
 
-    constructor(fen?: string) {
+    constructor() {
         this.blackPlayer = new Player('black');
         this.whitePlayer = new Player('white');
         this.blackPlayer.title = 'GM';
@@ -82,7 +82,7 @@ export default class ChessGame {
     }
 
     move(move: Move) {
-        const newPosition = this.movePiece(this.chessBoard, move.from!, move);
+        const newPosition = ChessGame.movePiece(this.chessBoard, move.from!, move);
         this.enPassant = this.computeEnPassent(move);
         this.turn = this.turn === 'w' ? 'b' : 'w';
         this.computeCheck();
@@ -96,7 +96,7 @@ export default class ChessGame {
         }
     }
 
-    private movePiece(chessBoard: ChessBoard, from: Square, to: Square) {
+    private static movePiece(chessBoard: ChessBoard, from: Square, to: Square) {
         const newChessBoard = chessBoard.clone();
         const piece = newChessBoard.getPiece(from);
         piece?.setMoved();
@@ -112,7 +112,7 @@ export default class ChessGame {
             return enPassant;
         }
         const rowDelta = row - from.row;
-        if (piece?.getFenKey().toLowerCase() === 'p') {
+        if (piece?.toFen().toLowerCase() === 'p') {
             switch (rowDelta) {
                 case 2:
                     enPassant = new EnPassant(`${columnLetters[column]}${row - 1}`, move);
@@ -168,7 +168,7 @@ export default class ChessGame {
             const maxDistance = Math.max(rows.length, columns.length);
             for (let i = 0; i < (step.limit || maxDistance); i++) {
                 const nextMove: Move = { row: from.row + ((i + 1) * step.row), column: from.column + ((i + 1) * step.column), piece: piece, from };
-                if (!this.isWithinBoard(nextMove)) {
+                if (!this.chessBoard.isWithinBoard(nextMove)) {
                     break;
                 }
                 const attackedPiece = this.getPieceAt(nextMove.row, nextMove.column);
@@ -198,18 +198,9 @@ export default class ChessGame {
         return possibleMoves;
     }
 
-    getAllSquares(): Square[] {
-        const squares: Square[] = [];
-        rows.forEach(row => {
-            columns.forEach(column => {
-                squares.push({ row, column, piece: this.getPieceAt(row, column) });
-            });
-        });
-        return squares;
-    }
 
     getAllMoves(color?: PlayerColor): Move[] {
-        const squares = this.getAllSquares();
+        const squares = this.chessBoard.getAllSquares();
         const moves: Move[] = [];
         squares.forEach(square => {
             this.getPossibleMovesFor(square, color).forEach(move => {
@@ -221,7 +212,7 @@ export default class ChessGame {
 
     computeCheck() {
         let moves = this.getAllMoves(this.turn === 'w' ? 'b' : 'w');
-        const king = this.getKing();
+        const king = this.chessBoard.getKing(this.turn);
         if (!king) {
             return;
         }
@@ -230,15 +221,6 @@ export default class ChessGame {
         if (this.check) {
             console.info('check');
         }
-    }
-
-    getKing() {
-        const kingToFind = this.turn === 'w' ? 'K' : 'k';
-        return this.getAllSquares().find(square => square.piece?.getFenKey() === kingToFind);
-
-    }
-    isWithinBoard(square: Square) {
-        return square.row > 0 && square.row < 9 && square.column > 0 && square.column < 9;
     }
 }
 

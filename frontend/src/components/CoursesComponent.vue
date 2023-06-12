@@ -65,7 +65,6 @@ export default defineComponent({
     courses(): Course[] {
       const courses = this.educationAndCourses.filter((educationAndCourse) => educationAndCourse.hasOwnProperty('Profiel cur naam')) as Course[];
       const sortedCourses = courses.sort(sortByCompleted);
-      console.log(sortedCourses);
       return sortedCourses;
     }
   },

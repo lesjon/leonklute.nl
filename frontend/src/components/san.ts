@@ -1,5 +1,7 @@
+import { C } from "app/dist/spa/assets/index.7ad02204";
 import { columnLetters } from "./chess-board";
 import { Move } from "./chess-game";
+import { ChessPieceType } from "./chess-pieces";
 
 export enum SanFormat {
     Long = 'long',
@@ -17,7 +19,7 @@ export default class San {
 
     fromSymbol(move: Move) {
         const piece = move.piece;
-        const panwTakes = piece.getFenKey().toLowerCase() === 'p' && move.takes && move.from ;
+        const panwTakes = piece.toFen().toLowerCase() === 'p' && move.takes && move.from ;
         if (panwTakes && move.from) {
             return columnLetters[move.from.column];
         }
@@ -26,30 +28,30 @@ export default class San {
 
     pieceSymbol(move: Move) {
         const piece = move.piece;
-        switch (piece.getFenKey()) {
-            case 'p':
-            case 'P':
+        switch (piece.getType()) {
+            case ChessPieceType.whitePawn:
+            case ChessPieceType.blackPawn:
                 if (move.takes && move.from) { return columnLetters[move.from?.column]; }
                 return '';
-            case 'N':
+            case ChessPieceType.whiteKnight:
                 return '♘';
-            case 'B':
+            case ChessPieceType.whiteBishop:
                 return '♗';
-            case 'R':
+            case ChessPieceType.whiteRook:
                 return '♖';
-            case 'Q':
+            case ChessPieceType.whiteQueen:
                 return '♕';
-            case 'K':
+            case ChessPieceType.whiteKing:
                 return '♔';
-            case 'n':
+            case ChessPieceType.blackKnight:
                 return '♞';
-            case 'b':
+            case ChessPieceType.blackBishop:
                 return '♝';
-            case 'r':
+            case ChessPieceType.blackRook:
                 return '♜';
-            case 'q':
+            case ChessPieceType.blackQueen:
                 return '♛';
-            case 'k':
+            case ChessPieceType.blackKing:
                 return '♚';
             default:
                 return '';
