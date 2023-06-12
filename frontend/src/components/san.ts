@@ -19,7 +19,7 @@ export default class San {
 
     fromSymbol(move: Move) {
         const piece = move.piece;
-        const pawnTakes = piece.toFen().toLowerCase() === 'p' && move.takes && move.from ;
+        const pawnTakes = piece.toFen().toLowerCase() === 'p' && move.takes && move.from;
         if (pawnTakes && move.from) {
             return columnLetters[move.from.column];
         }
@@ -70,6 +70,8 @@ export default class San {
         if (!move) {
             return '';
         }
+        if (move.shortCastle) { return 'O-O' + this.checkSymbol(move); }
+        if (move.longCastle) { return 'O-O-O' + this.checkSymbol(move); }
         return this.fromSymbol(move) + this.pieceSymbol(move) + this.takeSymbol(move) +
             columnLetters[move.column] + move.row + this.checkSymbol(move);
     }

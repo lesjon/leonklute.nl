@@ -212,6 +212,7 @@ export default class ChessGame {
         }
 
         piece.getChessPieceSteps().forEach(step => {
+            if (step.longCastle || step.shortCastle) console.log(step);
             const maxDistance = Math.max(rows.length, columns.length);
             for (let i = 0; i < (step.limit || maxDistance); i++) {
                 const nextMove: Move = {
@@ -241,7 +242,7 @@ export default class ChessGame {
                 if ((step.shortCastle || step.longCastle) && !this.isPossibleCastle(nextMove)) {
                     break;
                 }
-                if(checkCheck){
+                if (checkCheck) {
                     const newPosition = ChessGame.movePiece(this.chessBoard, nextMove.from!, nextMove);
                     const check = this.isInCheck(this.turn, newPosition);
                     nextMove.check = this.isInCheck(this.turn === 'w' ? 'b' : 'w', newPosition);
@@ -278,15 +279,14 @@ export default class ChessGame {
 
     checkCastlingFor(move: Move, kingSquare: SquareWithPiece): boolean {
         const rookType = kingSquare.piece.getColor() === 'w' ? ChessPieceType.whiteRook : ChessPieceType.blackRook;
+        const long = kingSquare.piece.getColor() === 'w' ? this.castling.whiteLong : this.castling.blackLong;
+        const short = kingSquare.piece.getColor() === 'w' ? this.castling.whiteShort : this.castling.blackShort;
         const unmovedRooks = this.chessBoard.getPieces(rookType)
             .filter(square => !square.piece.hasMoved());
         if (unmovedRooks.length === 0) {
             return false;
         }
-        if (this.castling.whiteShort && move.shortCastle) {
-            if (!this.castling.whiteShort) {
-                return false;
-            }
+        if (short && move.shortCastle) {
             const rook = unmovedRooks.filter(rook => rook.column > kingSquare.column).at(0);
             if (!rook) {
                 return false;
@@ -297,16 +297,17 @@ export default class ChessGame {
                 }
             }
             return true;
-        } else if (this.castling.whiteLong && move.longCastle) {
-            if (!this.castling.whiteLong) {
-                return false;
-            }
-            const rook = unmovedRooks.filter(rook => rook.column > kingSquare.column).at(0);
+        } else if (long && move.longCastle) {
+            console.log('long', long, move)
+            const rook = unmovedRooks.filter(rook => rook.column < kingSquare.column).at(0);
+            console.log('rook', rook)
             if (!rook) {
                 return false;
             }
-            for (let col = kingSquare.column - 1; col > rook.column; col--) {
+            for (let col = rook.column + 1; col < kingSquare.column; col++) {
                 if (this.chessBoard.getPiece({ row: kingSquare.row, column: col })) {
+
+                    console.log('col to be empty', col)
                     return false;
                 }
             }
