@@ -101,6 +101,7 @@ export default class ChessGame {
     chessBoard: ChessBoard = new ChessBoard(8, 8);
     whitePlayer?: Player;
     blackPlayer?: Player;
+    winner?: Player;
 
     moveTree: MoveNode[] = [];
     currentMoveNode: MoveNode | undefined = undefined;
@@ -135,6 +136,11 @@ export default class ChessGame {
         this.check = this.isInCheck(this.turn, this.chessBoard);
         if (this.check) {
             console.info('check');
+            if (this.getAllMoves(this.turn, this.chessBoard, true).length === 0) {
+                console.info('checkmate');
+                move.checkmate = true;
+                this.winner = this.turn === 'w' ? this.blackPlayer : this.whitePlayer;
+            }
         }
         this.updateCastling(move);
         const moveNode = new MoveNode(move);
@@ -217,7 +223,6 @@ export default class ChessGame {
         }
 
         piece.getChessPieceSteps().forEach(step => {
-            if (step.longCastle || step.shortCastle) console.log(step);
             const maxDistance = Math.max(rows.length, columns.length);
             for (let i = 0; i < (step.limit || maxDistance); i++) {
                 const nextMove: Move = {
