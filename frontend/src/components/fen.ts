@@ -1,5 +1,5 @@
 import ChessBoard from "./chess-board";
-import ChessGame, { EnPassant } from "./chess-game";
+import ChessGame, { CastlingState, EnPassant } from "./chess-game";
 import { ChessPieceFromFen, FENpieces, PlayerColor } from "./chess-pieces";
 
 export default class Fen {
@@ -10,7 +10,7 @@ export default class Fen {
         const board = fenArray[0];
         const game = new ChessGame();
         game.turn = fenArray[1] as PlayerColor;
-        game.castling = fenArray[2];
+        game.castling = new CastlingState(fenArray[2]);
         game.enPassant = new EnPassant(fenArray[3]);
         game.halfMove = fenArray[4];
         game.fullMove = fenArray[5];
@@ -45,9 +45,27 @@ export default class Fen {
              return rowArray.join('').replace(/1+/g, (match, p1) => match.length.toString());
         });
         const board = boardArray.reverse().join('/');
-        return `${board} ${game.turn} ${game.castling} ${game.enPassant.toFen()} ${game.halfMove} ${game.fullMove}`;
+
+        const castling = this.castlingFen(game.castling);
+        return `${board} ${game.turn} ${castling} ${game.enPassant.toFen()} ${game.halfMove} ${game.fullMove}`;
     }
 
+    static castlingFen(castlingState: CastlingState) {
+        let castling = '';
+        if (castlingState.whiteShort) {
+            castling += 'K';
+        }
+        if (castlingState.whiteLong) {
+            castling += 'Q';
+        }
+        if (castlingState.blackShort) {
+            castling += 'k';
+        }
+        if (castlingState.blackLong) {
+            castling += 'q';
+        }
+        return castling || '-';
+    }
     static gameFromStartPosition(): ChessGame {
         return Fen.fenParser(Fen.start_position_fen);
     }

@@ -15,6 +15,15 @@ export default class San {
         this.format = fmt || SanFormat.Short;
     }
 
+    fromSymbol(move: Move) {
+        const piece = move.piece;
+        const panwTakes = piece.getFenKey().toLowerCase() === 'p' && move.takes && move.from ;
+        if (panwTakes && move.from) {
+            return columnLetters[move.from.column];
+        }
+        return '';
+    }
+
     pieceSymbol(move: Move) {
         const piece = move.piece;
         switch (piece.getFenKey()) {
@@ -59,7 +68,7 @@ export default class San {
         if (!move) {
             return '';
         }
-        return this.pieceSymbol(move) + this.takeSymbol(move) +
+        return this.fromSymbol(move) + this.pieceSymbol(move) + this.takeSymbol(move) +
             columnLetters[move.column] + move.row + this.checkSymbol(move);
     }
 }

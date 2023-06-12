@@ -144,7 +144,7 @@ class King extends ChessPieceBase {
         super(fenKey);
     }
     getChessPieceSteps(): ChessPieceStep[] {
-        const castling: ChessPieceStep[] = [{ row: 0, column: 2, limit: 1, shortCastle: true }, { row: 0, column: -2, limit: 1, longCastle: true }];
+        const castling: ChessPieceStep[] = [{ row: 0, column: 2, limit: 1, shortCastle: true, excludesTake: true }, { row: 0, column: -2, limit: 1, longCastle: true, excludesTake: true }];
         return [...castling, { row: 0, column: 1, limit: 1 }, { row: -1, column: 1, limit: 1 }, { row: -1, column: 0, limit: 1 }, { row: -1, column: -1, limit: 1 }, { row: 0, column: -1, limit: 1 }, { row: 1, column: -1, limit: 1 }, { row: 1, column: 0, limit: 1 }, { row: 1, column: 1, limit: 1 }];
     }
 }

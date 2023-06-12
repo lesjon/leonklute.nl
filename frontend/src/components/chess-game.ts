@@ -33,9 +33,25 @@ class MoveNode {
     }
 }
 
+export class CastlingState {
+    whiteShort = true;
+    whiteLong = true;
+    blackShort = true;
+    blackLong = true;
+    constructor(castlingFen?: string) {
+        if (castlingFen) {
+            this.whiteShort = castlingFen.includes('K');
+            this.whiteLong = castlingFen.includes('Q');
+            this.blackShort = castlingFen.includes('k');
+            this.blackLong = castlingFen.includes('q');
+        }
+    }
+}
+    
+
 export default class ChessGame {
     turn: PlayerColor = 'w';
-    castling = 'KQkq';
+    castling =  new CastlingState();
     enPassant = new EnPassant('-');
     halfMove = '0';
     fullMove = '1';
@@ -162,7 +178,7 @@ export default class ChessGame {
                 if (attackedPiece && !piece.isOpponent(attackedPiece)) {
                     break;
                 }
-                const enPassant = this.enPassant;
+                const enPassant: EnPassant = this.enPassant;
                 const canEnPassant = isSameLocation(enPassant, nextMove);
                 if (canEnPassant && step.allowsEnPassant) {
                     nextMove.enPassant = enPassant;
@@ -233,6 +249,8 @@ export interface Move extends Square {
     from?: Square;
     check?: boolean;
     checkmate?: boolean;
+    shortCastle?: boolean;
+    longCastle?: boolean;
 }
 
 

@@ -8,7 +8,7 @@
       <q-input outlined readonly dense :model-value="fen" />
     </q-card-section>
     <q-card-section>
-      <q-table :rows="mainLine" :columns="COLUMNS" :rows-per-page-options="[0]" hide-pagination/>
+      <q-table :rows="mainLine" :columns="COLUMNS" :rows-per-page-options="[0]" hide-pagination hide-no-data/>
     </q-card-section>
   </q-card>
 </template>
@@ -37,7 +37,7 @@ export default defineComponent({
   },
   emits: ['flip', 'new-game'],
   data() {
-    const san: San = new San();
+    const san = new San();
     return {
       columnLetters,
       COLUMNS: [
