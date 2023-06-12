@@ -124,7 +124,12 @@ export default class ChessGame {
     }
 
     move(move: Move) {
-        this.chessBoard = ChessGame.movePiece(this.chessBoard, move.from!, move);
+        if (move.castling) {
+            const kingMovedChessBoard = ChessGame.movePiece(this.chessBoard, move.castling.kingMove.from!, move.castling.kingMove);
+            this.chessBoard = ChessGame.movePiece(kingMovedChessBoard, move.castling.rookMove.from!, move.castling.rookMove);
+        } else {
+            this.chessBoard = ChessGame.movePiece(this.chessBoard, move.from!, move);
+        }
         this.enPassant = ChessGame.computeEnPassent(move);
         this.turn = this.turn === 'w' ? 'b' : 'w';
         this.check = this.isInCheck(this.turn, this.chessBoard);
@@ -239,8 +244,12 @@ export default class ChessGame {
                 if (!(attackedPiece || canEnPassant) && step.requiresTake) {
                     break;
                 }
-                if ((step.shortCastle || step.longCastle) && !this.isPossibleCastle(nextMove)) {
-                    break;
+                if ((step.shortCastle || step.longCastle)) {
+                    const castling = this.getOptionalCastling(nextMove);
+                    if (!castling) {
+                        break;
+                    }
+                    nextMove.castling = castling;
                 }
                 if (checkCheck) {
                     const newPosition = ChessGame.movePiece(this.chessBoard, nextMove.from!, nextMove);
@@ -262,58 +271,54 @@ export default class ChessGame {
         return possibleMoves;
     }
 
-    isPossibleCastle(move: Move): boolean {
+    getOptionalCastling(move: Move): Castling | null {
         if (move.piece.hasMoved()) {
-            return false;
+            return null;
         }
         if (!move.shortCastle && !move.longCastle) {
-            return false;
+            return null;
         }
         const kingSquare = this.chessBoard.getKing(move.piece.getColor());
         if (!kingSquare) {
             console.error('No king found');
-            return false;
+            return null;
         }
-        return this.checkCastlingFor(move, kingSquare);
+        return this.getOptionalCastlingForKing(move, kingSquare);
     }
 
-    checkCastlingFor(move: Move, kingSquare: SquareWithPiece): boolean {
+    getOptionalCastlingForKing(move: Move, kingSquare: SquareWithPiece): Castling | null {
         const rookType = kingSquare.piece.getColor() === 'w' ? ChessPieceType.whiteRook : ChessPieceType.blackRook;
         const long = kingSquare.piece.getColor() === 'w' ? this.castling.whiteLong : this.castling.blackLong;
         const short = kingSquare.piece.getColor() === 'w' ? this.castling.whiteShort : this.castling.blackShort;
         const unmovedRooks = this.chessBoard.getPieces(rookType)
             .filter(square => !square.piece.hasMoved());
         if (unmovedRooks.length === 0) {
-            return false;
+            return null;
         }
         if (short && move.shortCastle) {
             const rook = unmovedRooks.filter(rook => rook.column > kingSquare.column).at(0);
             if (!rook) {
-                return false;
+                return null;
             }
             for (let col = kingSquare.column + 1; col < rook.column; col++) {
                 if (this.chessBoard.getPiece({ row: kingSquare.row, column: col })) {
-                    return false;
+                    return null;
                 }
             }
-            return true;
+            return short;
         } else if (long && move.longCastle) {
-            console.log('long', long, move)
             const rook = unmovedRooks.filter(rook => rook.column < kingSquare.column).at(0);
-            console.log('rook', rook)
             if (!rook) {
-                return false;
+                return null;
             }
             for (let col = rook.column + 1; col < kingSquare.column; col++) {
                 if (this.chessBoard.getPiece({ row: kingSquare.row, column: col })) {
-
-                    console.log('col to be empty', col)
-                    return false;
+                    return null;
                 }
             }
-            return true;
+            return long;
         }
-        return false;
+        return null;
     }
 
     updateCastling(move: Move) {

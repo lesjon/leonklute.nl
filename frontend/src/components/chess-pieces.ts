@@ -131,7 +131,7 @@ abstract class ChessPieceBase implements ChessPiece {
         return this.moved;
     }
     setMoved(moved?: boolean) {
-        this.moved = moved ?? false;
+        this.moved = moved ?? true;
     }
     abstract getChessPieceSteps(): ChessPieceStep[];
 
