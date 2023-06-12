@@ -46,7 +46,7 @@ export default class Fen {
         const board = fenArray[0];
         const game = new ChessGame();
         game.turn = fenArray[1] as PlayerColor;
-        game.castling = new CastlingState(fenArray[2]);
+        game.castling = this.castlingFromFen(fenArray[2]);
         game.enPassant = new EnPassant(fenArray[3]);
         game.halfMove = fenArray[4];
         game.fullMove = fenArray[5];
@@ -105,6 +105,15 @@ export default class Fen {
             castling += 'q';
         }
         return castling || '-';
+    }
+
+    static castlingFromFen(castlingFen: string) {
+        const castlingState = new CastlingState();
+        castlingState.whiteShort = castlingFen.includes('K');
+        castlingState.whiteLong = castlingFen.includes('Q');
+        castlingState.blackShort = castlingFen.includes('k');
+        castlingState.blackLong = castlingFen.includes('q');
+        return castlingState;
     }
     static gameFromStartPosition(): ChessGame {
         return Fen.fenParser(Fen.start_position_fen);

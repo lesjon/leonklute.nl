@@ -38,13 +38,11 @@ export class CastlingState {
     whiteLong = true;
     blackShort = true;
     blackLong = true;
-    constructor(castlingFen?: string) {
-        if (castlingFen) {
-            this.whiteShort = castlingFen.includes('K');
-            this.whiteLong = castlingFen.includes('Q');
-            this.blackShort = castlingFen.includes('k');
-            this.blackLong = castlingFen.includes('q');
-        }
+    constructor(whiteShort?: boolean, whiteLong?: boolean, blackShort?: boolean, blackLong?: boolean) {
+        this.whiteShort = whiteShort ?? true;
+        this.whiteLong = whiteLong ?? true;
+        this.blackShort = blackShort ?? true;
+        this.blackLong = blackLong ?? true;
     }
 }
     
