@@ -63,7 +63,7 @@ export default defineComponent({
         this.selectedSquare = square;
         const game = this.game;
         if (!game) return;
-        this.possibleMoves = this.game?.getPossibleMovesFor(square, game.turn, game.chessBoard) || [];
+        this.possibleMoves = this.game?.getPossibleMovesFor(square, game.turn, game.chessBoard, true) || [];
         return;
       }
       if (isSameLocation(this.selectedSquare, square)) {
@@ -79,7 +79,7 @@ export default defineComponent({
         this.selectedSquare = square;
         const game = this.game;
         if (!game) return;
-        this.possibleMoves = this.game?.getPossibleMovesFor(square, game.turn, game.chessBoard) || [];
+        this.possibleMoves = this.game?.getPossibleMovesFor(square, game.turn, game.chessBoard, true) || [];
       }
     },
     moveFab(details: { evt: Event, delta: { x: number, y: number } }) {

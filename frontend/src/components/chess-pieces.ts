@@ -69,8 +69,9 @@ export default interface ChessPiece {
     isOpponent(piece: ChessPiece): boolean;
     getChessPieceSteps(): ChessPieceStep[];
     hasMoved(): boolean;
-    setMoved(): void;
+    setMoved(moved?: boolean): void;
     toFen(): string;
+    clone(): ChessPiece;
 }
 
 export const ChessPieceFromType = (pieceType: ChessPieceType): ChessPiece | null => {
@@ -129,13 +130,22 @@ abstract class ChessPieceBase implements ChessPiece {
     hasMoved(): boolean {
         return this.moved;
     }
-    setMoved() {
-        this.moved = true;
+    setMoved(moved?: boolean) {
+        this.moved = moved ?? false;
     }
     abstract getChessPieceSteps(): ChessPieceStep[];
 
     toFen(): string {
         return pieceToFen(this.pieceType);
+    }
+
+    clone(): ChessPiece {
+        const newPiece = ChessPieceFromType(this.pieceType);
+        if (!newPiece) {
+            throw new Error(`Invalid piece type: ${this.pieceType}`);
+        }
+        newPiece.setMoved(this.moved);
+        return newPiece;
     }
 
 }

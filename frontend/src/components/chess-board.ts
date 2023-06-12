@@ -60,7 +60,7 @@ export default class ChessBoard {
 
     clone(): ChessBoard {
         const newBoard = new ChessBoard(this.squares.length, this.squares[0].length);
-        newBoard.setBoard(this.squares.map(row => row.map(cell => cell)));
+        newBoard.setBoard(this.squares.map(row => row.map(cell => cell ? cell.clone() : null)));
         return newBoard;
     }
 
@@ -68,7 +68,7 @@ export default class ChessBoard {
         const squares: Square[] = [];
         rows.forEach(row => {
             columns.forEach(column => {
-                squares.push({ row, column, piece: this.squares[row-1][column-1] });
+                squares.push({ row, column, piece: this.squares[row - 1][column - 1] });
             });
         });
         return squares;
@@ -86,6 +86,6 @@ export default class ChessBoard {
     }
 
     isWithinBoard(square: Square) {
-        return rows.includes( square.row) && columns.includes( square.column);
+        return rows.includes(square.row) && columns.includes(square.column);
     }
 }

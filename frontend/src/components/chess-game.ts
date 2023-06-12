@@ -180,18 +180,11 @@ export default class ChessGame {
             console.info('not your turn');
             return false;
         }
-        const possibleMoves = this.getPossibleMovesFor(from, this.turn, this.chessBoard);
+        const possibleMoves = this.getPossibleMovesFor(from, this.turn, this.chessBoard, true);
         const move: Move | undefined = possibleMoves.find(move => isSameLocation(move, to));
-        
+
         if (!move) {
             console.info('not a possible move');
-            return false;
-        }
-        console.info(`calculate if player (${this.turn}) is in check after his move: `, move);
-        const newPosition = ChessGame.movePiece(this.chessBoard, move.from!, move);
-        const check = this.isInCheck(this.turn, newPosition);
-        if (check) {
-            console.info('illegal cant be in check after move');
             return false;
         }
         if (move.enPassant?.squareToTake) {
@@ -207,7 +200,7 @@ export default class ChessGame {
         return false;
     }
 
-    getPossibleMovesFor(from: Square, playerColor: PlayerColor, chessBoard: ChessBoard): Move[] {
+    getPossibleMovesFor(from: Square, playerColor: PlayerColor, chessBoard: ChessBoard, checkCheck: boolean): Move[] {
         const possibleMoves: Move[] = [];
         const piece = chessBoard.getPiece(from);
         playerColor = playerColor;
@@ -248,6 +241,15 @@ export default class ChessGame {
                 if ((step.shortCastle || step.longCastle) && !this.isPossibleCastle(nextMove)) {
                     break;
                 }
+                if(checkCheck){
+                    const newPosition = ChessGame.movePiece(this.chessBoard, nextMove.from!, nextMove);
+                    const check = this.isInCheck(this.turn, newPosition);
+                    nextMove.check = this.isInCheck(this.turn === 'w' ? 'b' : 'w', newPosition);
+                    if (check) {
+                        console.info('illegal cant be in check after move');
+                        break;
+                    }
+                }
                 possibleMoves.push(nextMove);
                 if (attackedPiece) {
                     nextMove.takes = attackedPiece;
@@ -260,20 +262,17 @@ export default class ChessGame {
     }
 
     isPossibleCastle(move: Move): boolean {
-        console.log('isPossibleCastle', move);
         if (move.piece.hasMoved()) {
-            console.log('move.piece.hasMoved()');
             return false;
         }
         if (!move.shortCastle && !move.longCastle) {
-            console.log('!move.shortCastle && !move.longCastle');
             return false;
         }
         const kingSquare = this.chessBoard.getKing(move.piece.getColor());
         if (!kingSquare) {
-            throw new Error('No king found');
+            console.error('No king found');
+            return false;
         }
-        console.log('kingSquare', kingSquare, this.castling);
         return this.checkCastlingFor(move, kingSquare);
     }
 
@@ -282,23 +281,18 @@ export default class ChessGame {
         const unmovedRooks = this.chessBoard.getPieces(rookType)
             .filter(square => !square.piece.hasMoved());
         if (unmovedRooks.length === 0) {
-            console.log('unmovedRooks.length', unmovedRooks.length);
             return false;
         }
         if (this.castling.whiteShort && move.shortCastle) {
             if (!this.castling.whiteShort) {
-                console.log('castling.whiteShort', this.castling.whiteShort);
                 return false;
             }
             const rook = unmovedRooks.filter(rook => rook.column > kingSquare.column).at(0);
             if (!rook) {
-                console.log('rook', rook);
                 return false;
             }
             for (let col = kingSquare.column + 1; col < rook.column; col++) {
-                console.log(col);
                 if (this.chessBoard.getPiece({ row: kingSquare.row, column: col })) {
-                    console.log('this.chessBoard.getPiece({ row: kingSquare.row, column: col })', this.chessBoard.getPiece({ row: kingSquare.row, column: col }));
                     return false;
                 }
             }
@@ -309,13 +303,10 @@ export default class ChessGame {
             }
             const rook = unmovedRooks.filter(rook => rook.column > kingSquare.column).at(0);
             if (!rook) {
-                console.log('rook', rook);
                 return false;
             }
             for (let col = kingSquare.column - 1; col > rook.column; col--) {
-                console.log(col);
                 if (this.chessBoard.getPiece({ row: kingSquare.row, column: col })) {
-                    console.log('this.chessBoard.getPiece({ row: kingSquare.row, column: col })', this.chessBoard.getPiece({ row: kingSquare.row, column: col }));
                     return false;
                 }
             }
@@ -345,11 +336,11 @@ export default class ChessGame {
     }
 
 
-    getAllMoves(color: PlayerColor, chessBoard: ChessBoard): Move[] {
+    getAllMoves(color: PlayerColor, chessBoard: ChessBoard, checkCheck: boolean): Move[] {
         const squares = chessBoard.getAllSquares();
         const moves: Move[] = [];
         squares.forEach(square => {
-            this.getPossibleMovesFor(square, color, chessBoard).forEach(move => {
+            this.getPossibleMovesFor(square, color, chessBoard, checkCheck).forEach(move => {
                 moves.push(move);
             });
         });
@@ -357,11 +348,8 @@ export default class ChessGame {
     }
 
     isInCheck(turn: PlayerColor, chessBoard: ChessBoard): boolean {
-        console.log('computeCheck', chessBoard, turn);
-        let moves = this.getAllMoves(turn === 'w' ? 'b' : 'w', chessBoard);
-        console.log('moves', moves);
+        let moves = this.getAllMoves(turn === 'w' ? 'b' : 'w', chessBoard, false);
         const king = chessBoard.getKing(turn);
-        console.log('king', king);
         if (!king) {
             return false;
         }
