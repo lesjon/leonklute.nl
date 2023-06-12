@@ -1,6 +1,6 @@
-import ChessBoard from "./chess-board";
-import ChessGame, { CastlingState, EnPassant } from "./chess-game";
-import { ChessPieceFromType, ChessPieceType, PlayerColor } from "./chess-pieces";
+import ChessBoard from './chess-board';
+import ChessGame, { Castling, CastlingState, EnPassant, Move } from './chess-game';
+import { ChessPieceFromType, ChessPieceType, PlayerColor } from './chess-pieces';
 
 
 const fenToPiece = (fen: string): ChessPieceType | null => {
@@ -46,7 +46,6 @@ export default class Fen {
         const board = fenArray[0];
         const game = new ChessGame();
         game.turn = fenArray[1] as PlayerColor;
-        game.castling = this.castlingFromFen(fenArray[2]);
         game.enPassant = new EnPassant(fenArray[3]);
         game.halfMove = fenArray[4];
         game.fullMove = fenArray[5];
@@ -68,6 +67,7 @@ export default class Fen {
             return row2DArray.flat();
         });
         chessBoard.setBoard(board2DArray);
+        game.castling = this.castlingFromFen(fenArray[2], chessBoard);
         game.chessBoard = chessBoard;
         return game;
     }
@@ -107,13 +107,68 @@ export default class Fen {
         return castling || '-';
     }
 
-    static castlingFromFen(castlingFen: string) {
-        const castlingState = new CastlingState();
-        castlingState.whiteShort = castlingFen.includes('K');
-        castlingState.whiteLong = castlingFen.includes('Q');
-        castlingState.blackShort = castlingFen.includes('k');
-        castlingState.blackLong = castlingFen.includes('q');
-        return castlingState;
+    static castlingFromFen(castlingFen: string, ChessBoard: ChessBoard) {
+        let whiteShort = undefined;
+        let whiteLong = undefined;
+        let blackShort = undefined;
+        let blackLong = undefined;
+
+        const whiteKing = ChessBoard.getPieces(ChessPieceType.whiteKing).at(0);
+        const blackKing = ChessBoard.getPieces(ChessPieceType.blackKing).at(0);
+        if (!whiteKing || !blackKing) {
+            throw new Error('Invalid castling state; missing a king:' + { whiteKing, blackKing });
+        }
+        const whiteRooks = ChessBoard.getPieces(ChessPieceType.whiteRook);
+        const blackRooks = ChessBoard.getPieces(ChessPieceType.blackRook);
+        if (castlingFen.includes('K')) {
+            const rooks = whiteRooks.filter(rook => rook.column > whiteKing.column);
+            const rook = rooks.at(0);
+            if (!rook) {
+                console.error('Invalid castling state; no appropriate rook found');
+            } else {
+                const rookMove: Move = { from: { row: rook.row, column: rook.column }, row: rook.row, column: 6, piece: rook.piece };
+                const kingMove: Move = { from: { row: whiteKing.row, column: whiteKing.column }, row: whiteKing.row, column: 7, piece: whiteKing.piece };
+                whiteShort = new Castling(kingMove, rookMove)
+
+            }
+
+        }
+        if (castlingFen.includes('Q')) {
+            const rooks = whiteRooks.filter(rook => rook.column < whiteKing.column);
+            const rook = rooks.at(0);
+            if (!rook) {
+                console.error('Invalid castling state; no appropriate rook found');
+            } else {
+                const rookMove: Move = { from: { row: rook.row, column: rook.column }, row: rook.row, column: 4, piece: rook.piece };
+                const kingMove: Move = { from: { row: whiteKing.row, column: whiteKing.column }, row: whiteKing.row, column: 3, piece: whiteKing.piece };
+                whiteLong = new Castling(kingMove, rookMove);
+            }
+        }
+        if (castlingFen.includes('k')) {
+            const rooks = blackRooks.filter(rook => rook.column > blackKing.column);
+            const rook = rooks.at(0);
+            if (!rook) {
+                console.error('Invalid castling state; no appropriate rook found');
+            } else {
+                const rookMove: Move = { from: { row: rook.row, column: rook.column }, row: rook.row, column: 6, piece: rook.piece };
+                const kingMove: Move = { from: { row: blackKing.row, column: blackKing.column }, row: blackKing.row, column: 7, piece: blackKing.piece };
+                blackShort = new Castling(kingMove, rookMove)
+            }
+
+        }
+        if (castlingFen.includes('q')) {
+            const rooks = blackRooks.filter(rook => rook.column < blackKing.column);
+            const rook = rooks.at(0);
+            if (!rook) {
+                console.error('Invalid castling state; no appropriate rook found');
+
+            } else {
+                const rookMove: Move = { from: { row: rook.row, column: rook.column }, row: rook.row, column: 4, piece: rook.piece };
+                const kingMove: Move = { from: { row: blackKing.row, column: blackKing.column }, row: blackKing.row, column: 3, piece: blackKing.piece };
+                blackLong = new Castling(kingMove, rookMove);
+            }
+        }
+        return new CastlingState(whiteShort, whiteLong, blackShort, blackLong);
     }
     static gameFromStartPosition(): ChessGame {
         return Fen.fenParser(Fen.start_position_fen);

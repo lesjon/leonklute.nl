@@ -19,8 +19,8 @@ export default class San {
 
     fromSymbol(move: Move) {
         const piece = move.piece;
-        const panwTakes = piece.toFen().toLowerCase() === 'p' && move.takes && move.from ;
-        if (panwTakes && move.from) {
+        const pawnTakes = piece.toFen().toLowerCase() === 'p' && move.takes && move.from ;
+        if (pawnTakes && move.from) {
             return columnLetters[move.from.column];
         }
         return '';

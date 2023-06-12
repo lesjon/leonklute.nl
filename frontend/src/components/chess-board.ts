@@ -59,7 +59,9 @@ export default class ChessBoard {
     }
 
     clone(): ChessBoard {
-        return Object.assign(Object.create(Object.getPrototypeOf(this)), this);
+        const newBoard = new ChessBoard(this.squares.length, this.squares[0].length);
+        newBoard.setBoard(this.squares.map(row => row.map(cell => cell)));
+        return newBoard;
     }
 
     getAllSquares(): Square[] {
@@ -84,6 +86,6 @@ export default class ChessBoard {
     }
 
     isWithinBoard(square: Square) {
-        return square.row > 0 && square.row < 9 && square.column > 0 && square.column < 9;
+        return rows.includes( square.row) && columns.includes( square.column);
     }
 }
