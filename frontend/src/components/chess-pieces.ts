@@ -60,6 +60,7 @@ interface ChessPieceStep {
     allowsEnPassant?: boolean;
     shortCastle?: boolean;
     longCastle?: boolean;
+    canPromote?: boolean;
 }
 
 export default interface ChessPiece {
@@ -190,7 +191,7 @@ class Bishop extends ChessPieceBase {
         super(fenKey);
     }
     getChessPieceSteps(): ChessPieceStep[] {
-        return [{ row: 1, column: -1}, { row: -1, column: -1 }, { row: -1, column: 1 }, { row: 1, column: 1}];
+        return [{ row: 1, column: -1 }, { row: -1, column: -1 }, { row: -1, column: 1 }, { row: 1, column: 1 }];
     }
 }
 
@@ -201,7 +202,8 @@ class Pawn extends ChessPieceBase {
 
     getChessPieceSteps(): ChessPieceStep[] {
         const direction = this.color === 'w' ? 1 : -1;
-        
-        return [{ row: direction, column: 0, limit: this.moved ? 1 : 2, excludesTake: true }, { row: direction, column: 1, limit: 1, requiresTake: true, allowsEnPassant: true }, { row: direction, column: -1, limit: 1, requiresTake: true, allowsEnPassant: true }];
+        const takes: ChessPieceStep[] = [{ row: direction, column: 1, limit: 1, requiresTake: true, allowsEnPassant: true, canPromote: true }, { row: direction, column: -1, limit: 1, requiresTake: true, allowsEnPassant: true, canPromote: true }];
+
+        return [...takes, { row: direction, column: 0, limit: this.moved ? 1 : 2, excludesTake: true, canPromote: true }];
     }
 }

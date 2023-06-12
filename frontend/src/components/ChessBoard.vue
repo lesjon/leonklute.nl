@@ -11,7 +11,7 @@
         <div class="row justify-between" style="position: relative;">
           <player-card class="row" :game="game" :color="flipped ? 'b' : 'w'" />
           <q-btn fab flat icon="zoom_out_map" style="position: absolute; right: -40px; top: -15px;"
-            v-touch-pan.prevent.mouse="moveFab"  />
+            v-touch-pan.prevent.mouse="moveFab" />
         </div>
       </div>
     </q-responsive>
@@ -24,6 +24,7 @@ import { rows, columns, Square, isSameLocation } from './chess-board';
 import ChessSquare from './ChessSquare.vue';
 import ChessGame from './chess-game';
 import PlayerCard from './PlayerCard.vue';
+import { ChessPieceType } from './chess-pieces';
 
 export default defineComponent({
   name: 'ChessBoard',
@@ -59,11 +60,11 @@ export default defineComponent({
   methods: {
     isSameLocation,
     onSquareClick(square: Square) {
+      const game = this.game;
       if (!this.selectedSquare) {
         this.selectedSquare = square;
-        const game = this.game;
         if (!game) return;
-        this.possibleMoves = this.game?.getPossibleMovesFor(square, game.turn, game.chessBoard, true) || [];
+        this.possibleMoves = game?.getPossibleMovesFor(square, game.turn, game.chessBoard, true) || [];
         return;
       }
       if (isSameLocation(this.selectedSquare, square)) {
@@ -72,14 +73,18 @@ export default defineComponent({
         this.possibleMoves = [];
         return;
       }
-      if (this.game?.movePieceIfLegal(this.selectedSquare, square)) {
+      const isPromotionRow = square.row === rows[0] || square.row === rows.at(-1);
+      if (this.selectedSquare.piece?.toFen().toUpperCase() === 'P' && isPromotionRow) {
+        if (!game) return;
+        game.setPromotion(game.turn === 'w' ? ChessPieceType.whiteQueen : ChessPieceType.blackQueen);
+      }
+      if (game?.movePieceIfLegal(this.selectedSquare, square)) {
         this.selectedSquare = undefined;
         this.possibleMoves = [];
       } else {
         this.selectedSquare = square;
-        const game = this.game;
         if (!game) return;
-        this.possibleMoves = this.game?.getPossibleMovesFor(square, game.turn, game.chessBoard, true) || [];
+        this.possibleMoves = game?.getPossibleMovesFor(square, game.turn, game.chessBoard, true) || [];
       }
     },
     moveFab(details: { evt: Event, delta: { x: number, y: number } }) {

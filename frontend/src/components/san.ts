@@ -31,7 +31,6 @@ export default class San {
         switch (piece.getType()) {
             case ChessPieceType.whitePawn:
             case ChessPieceType.blackPawn:
-                if (move.takes && move.from) { return columnLetters[move.from?.column]; }
                 return '';
             case ChessPieceType.whiteKnight:
                 return '♘';
@@ -73,6 +72,13 @@ export default class San {
         if (move.shortCastle) { return 'O-O' + this.checkSymbol(move); }
         if (move.longCastle) { return 'O-O-O' + this.checkSymbol(move); }
         return this.fromSymbol(move) + this.pieceSymbol(move) + this.takeSymbol(move) +
-            columnLetters[move.column] + move.row + this.checkSymbol(move);
+            columnLetters[move.column] + move.row + this.formatPromotion(move) + this.checkSymbol(move);
+    }
+
+    formatPromotion(move: Move) {
+        if (move.promotion) {
+            return '=' + move.promotion.toFen();
+        }
+        return '';
     }
 }
