@@ -1,6 +1,7 @@
-import ChessPiece, { PlayerColor } from './chess-pieces';
-import ChessBoard, { rows, columns, Square, columnLetters, isSameLocation } from './chess-board';
+import ChessPiece, { ChessPieceType, PlayerColor } from './chess-pieces';
+import ChessBoard, { rows, columns, Square, columnLetters, isSameLocation, SquareWithPiece } from './chess-board';
 import Player from './player';
+import { C } from 'app/dist/spa/assets/index.7ad02204';
 
 class MoveNode {
     move: Move;
@@ -45,11 +46,11 @@ export class CastlingState {
         this.blackLong = blackLong ?? true;
     }
 }
-    
+
 
 export default class ChessGame {
     turn: PlayerColor = 'w';
-    castling =  new CastlingState();
+    castling = new CastlingState();
     enPassant = new EnPassant('-');
     halfMove = '0';
     fullMove = '1';
@@ -81,9 +82,10 @@ export default class ChessGame {
 
     move(move: Move) {
         const newPosition = ChessGame.movePiece(this.chessBoard, move.from!, move);
-        this.enPassant = this.computeEnPassent(move);
+        this.enPassant = ChessGame.computeEnPassent(move);
         this.turn = this.turn === 'w' ? 'b' : 'w';
         this.computeCheck();
+        this.updateCastling(move);
         const moveNode = new MoveNode(move);
         if (this.currentMoveNode) {
             this.currentMoveNode?.addChild(moveNode);
@@ -103,8 +105,8 @@ export default class ChessGame {
         return newChessBoard;
     }
 
-    computeEnPassent(move: Move) {
-        const {from, row, column, piece} = move;
+    static computeEnPassent(move: Move) {
+        const { from, row, column, piece } = move;
         let enPassant = new EnPassant('-');
         if (!from) {
             return enPassant;
@@ -165,7 +167,11 @@ export default class ChessGame {
         piece.getChessPieceSteps().forEach(step => {
             const maxDistance = Math.max(rows.length, columns.length);
             for (let i = 0; i < (step.limit || maxDistance); i++) {
-                const nextMove: Move = { row: from.row + ((i + 1) * step.row), column: from.column + ((i + 1) * step.column), piece: piece, from };
+                const nextMove: Move = {
+                    row: from.row + ((i + 1) * step.row), column: from.column + ((i + 1) * step.column),
+                    piece: piece, from,
+                    shortCastle: step.shortCastle, longCastle: step.longCastle
+                };
                 if (!this.chessBoard.isWithinBoard(nextMove)) {
                     break;
                 }
@@ -185,8 +191,12 @@ export default class ChessGame {
                 if (!(attackedPiece || canEnPassant) && step.requiresTake) {
                     break;
                 }
+                console.log('nextMove', nextMove)
+                if ((step.shortCastle || step.longCastle) && !this.isPossibleCastle(nextMove)) {
+                    break;
+                }
                 possibleMoves.push(nextMove);
-                if (attackedPiece ) {
+                if (attackedPiece) {
                     nextMove.takes = attackedPiece;
                     break;
                 }
@@ -194,6 +204,92 @@ export default class ChessGame {
         });
 
         return possibleMoves;
+    }
+
+    isPossibleCastle(move: Move): boolean {
+        console.log('isPossibleCastle', move);
+        if (move.piece.hasMoved()) {
+            console.log('move.piece.hasMoved()');
+            return false;
+        }
+        if (!move.shortCastle && !move.longCastle) {
+            console.log('!move.shortCastle && !move.longCastle');
+            return false;
+        }
+        const isWhiteKing = move.piece.getColor() === 'w';
+        const kingSquare = this.chessBoard.getKing(move.piece.getColor());
+        if (!kingSquare) {
+            throw new Error('No king found');
+        }
+        console.log('kingSquare', kingSquare, this.castling);
+        return this.checkCastlingFor(move, kingSquare);
+    }
+
+    checkCastlingFor(move: Move, kingSquare: SquareWithPiece): boolean {
+        const rookType = kingSquare.piece.getColor() === 'w' ? ChessPieceType.whiteRook : ChessPieceType.blackRook;
+        const unmovedRooks = this.chessBoard.getPieces(rookType)
+            .filter(square => !square.piece.hasMoved());
+        if (unmovedRooks.length === 0) {
+            console.log('unmovedRooks.length', unmovedRooks.length);
+            return false;
+        }
+        if (this.castling.whiteShort && move.shortCastle) {
+            if (!this.castling.whiteShort) {
+                console.log('castling.whiteShort', this.castling.whiteShort);
+                return false;
+            }
+            const rook = unmovedRooks.filter(rook => rook.column > kingSquare.column).at(0);
+            if (!rook) {
+                console.log('rook', rook);
+                return false;
+            }
+            for (let col = kingSquare.column + 1; col < rook.column; col++) {
+                console.log(col);
+                if (this.chessBoard.getPiece({ row: kingSquare.row, column: col })) {
+                    console.log('this.chessBoard.getPiece({ row: kingSquare.row, column: col })', this.chessBoard.getPiece({ row: kingSquare.row, column: col }));
+                    return false;
+                }
+            }
+            return true;
+        } else if (this.castling.whiteLong && move.longCastle) {
+            if (!this.castling.whiteLong) {
+                return false;
+            }
+            const rook = unmovedRooks.filter(rook => rook.column > kingSquare.column).at(0);
+            if (!rook) {
+                console.log('rook', rook);
+                return false;
+            }
+            for (let col = kingSquare.column - 1; col > rook.column; col--) {
+                console.log(col);
+                if (this.chessBoard.getPiece({ row: kingSquare.row, column: col })) {
+                    console.log('this.chessBoard.getPiece({ row: kingSquare.row, column: col })', this.chessBoard.getPiece({ row: kingSquare.row, column: col }));
+                    return false;
+                }
+            }
+            return true;
+        }
+        return false;
+    }
+
+    updateCastling(move: Move) {
+        const whiteKing = this.chessBoard.getKing('w');
+        const blackKing = this.chessBoard.getKing('b');
+        if (move.piece.getType() === ChessPieceType.whiteKing) {
+            this.castling.whiteShort = false;
+            this.castling.whiteLong = false;
+        } else if (move.piece.getType() === ChessPieceType.blackKing) {
+            this.castling.blackShort = false;
+            this.castling.blackLong = false;
+        } else if (move.piece.getType() === ChessPieceType.whiteRook && move.from?.column < whiteKing?.column) {
+            this.castling.whiteLong = false;
+        } else if (move.piece.getType() === ChessPieceType.whiteRook && move.from?.column > whiteKing?.column) {
+            this.castling.whiteShort = false;
+        } else if (move.piece.getType() === ChessPieceType.blackRook && move.from?.column < blackKing?.column) {
+            this.castling.blackLong = false;
+        } else if (move.piece.getType() === ChessPieceType.blackRook && move.from?.column > blackKing?.column) {
+            this.castling.blackShort = false;
+        }
     }
 
 

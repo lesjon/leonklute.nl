@@ -65,7 +65,7 @@ interface ChessPieceStep {
 export default interface ChessPiece {
     getFullName(): string;
     getType(): ChessPieceType;
-    getColor(): string;
+    getColor(): PlayerColor;
     isOpponent(piece: ChessPiece): boolean;
     getChessPieceSteps(): ChessPieceStep[];
     hasMoved(): boolean;
@@ -120,7 +120,7 @@ abstract class ChessPieceBase implements ChessPiece {
     getType(): ChessPieceType {
         return this.pieceType;
     }
-    getColor(): string {
+    getColor(): PlayerColor {
         return this.color;
     }
     isOpponent(piece: ChessPiece): boolean {

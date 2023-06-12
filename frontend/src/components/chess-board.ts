@@ -22,6 +22,10 @@ export interface Square {
     piece?: ChessPiece | null;
 }
 
+export interface SquareWithPiece extends Square {
+    piece: ChessPiece;
+}
+
 // function to test whether a square is in the same location as another square
 export function isSameLocation(lhs: Square, rhs: Square) {
     return lhs.row === rhs.row && lhs.column === rhs.column;
@@ -68,15 +72,15 @@ export default class ChessBoard {
         return squares;
     }
 
-    getPieces(pieceType: ChessPieceType): Square[] {
+    getPieces(pieceType: ChessPieceType): SquareWithPiece[] {
         return this.getAllSquares()
             .filter(square => square.piece)
-            .filter(square => square.piece?.getType() === pieceType);
+            .filter(square => square.piece?.getType() === pieceType) as SquareWithPiece[];
     }
 
-    getKing(color?: PlayerColor): Square | undefined {
+    getKing(color?: PlayerColor): SquareWithPiece | undefined {
         const kingToFind = color === 'w' ? ChessPieceType.whiteKing : ChessPieceType.blackKing;
-        return this.getPieces(kingToFind).find(square => square.piece?.getType() === kingToFind);
+        return this.getPieces(kingToFind).at(0);
     }
 
     isWithinBoard(square: Square) {
