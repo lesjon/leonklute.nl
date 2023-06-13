@@ -67,10 +67,12 @@ export default defineComponent({
       const game = this.game;
       if(!this.selectedSquare) {
         this.selectSquareAndCalculatePossibleMoves(square);
-      } else if(this.selectedSquare && isSameLocation(this.selectedSquare, square)) {
+      } else if(isSameLocation(this.selectedSquare, square)) {
         this.selectedSquare = undefined;
         this.possibleMoves = [];
         return;
+      } else if (!this.possibleMoves.some(sqr => isSameLocation(sqr, square))) {
+        this.selectSquareAndCalculatePossibleMoves(square);
       }
     },
     async onSquareMouseUp(square: Square) {
