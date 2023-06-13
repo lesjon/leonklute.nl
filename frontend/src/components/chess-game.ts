@@ -138,6 +138,7 @@ export default class ChessGame {
         this.turn = this.turn === 'w' ? 'b' : 'w';
         this.check = this.isInCheck(this.turn, this.chessBoard);
         if (this.check) {
+            move.check = true;
             if (this.getAllMoves(this.turn, this.chessBoard, true).length === 0) {
                 move.checkmate = true;
                 this.winner = this.turn === 'w' ? this.blackPlayer : this.whitePlayer;
@@ -256,8 +257,16 @@ export default class ChessGame {
                     }
                     nextMove.castling = castling;
                 }
+                if (step.promotion && this.isPromotion(nextMove)) {
+                    nextMove.promotion = chessPieceFromType(step.promotion) ?? undefined;
+                }else if (step.promotion && !this.isPromotion(nextMove)){
+                    break;
+                }
                 if (checkCheck) {
                     const newPosition = ChessGame.movePiece(this.chessBoard, nextMove.from!, nextMove);
+                    if (nextMove.promotion) {
+                        newPosition.setPiece(nextMove, nextMove.promotion);
+                    }
                     const check = this.isInCheck(this.turn, newPosition);
                     nextMove.check = this.isInCheck(this.turn === 'w' ? 'b' : 'w', newPosition);
                     if (check) {

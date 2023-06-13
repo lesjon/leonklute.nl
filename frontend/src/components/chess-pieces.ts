@@ -61,6 +61,7 @@ interface ChessPieceStep {
     shortCastle?: boolean;
     longCastle?: boolean;
     canPromote?: boolean;
+    promotion?: ChessPieceType;
 }
 
 export default interface ChessPiece {
@@ -202,8 +203,21 @@ class Pawn extends ChessPieceBase {
 
     getChessPieceSteps(): ChessPieceStep[] {
         const direction = this.color === 'w' ? 1 : -1;
+        const whitePromotionOptions = [ChessPieceType.whiteQueen, ChessPieceType.whiteRook, ChessPieceType.whiteBishop, ChessPieceType.whiteKnight];
+        const blackPromotionOptions = [ChessPieceType.blackQueen, ChessPieceType.blackRook, ChessPieceType.blackBishop, ChessPieceType.blackKnight];
+        const promotionOptions = this.color === 'w' ? whitePromotionOptions : blackPromotionOptions;
         const takes: ChessPieceStep[] = [{ row: direction, column: 1, limit: 1, requiresTake: true, allowsEnPassant: true, canPromote: true }, { row: direction, column: -1, limit: 1, requiresTake: true, allowsEnPassant: true, canPromote: true }];
 
-        return [...takes, { row: direction, column: 0, limit: this.moved ? 1 : 2, excludesTake: true, canPromote: true }];
+        const allStepsToGetPromotionOptions =  [...takes, { row: direction, column: 0, limit: this.moved ? 1 : 2, excludesTake: true, canPromote: true }];
+        const allSteps = [];
+        for (const step of allStepsToGetPromotionOptions) {
+            allSteps.push(step);
+            if (step.canPromote) {
+                for (const promotion of promotionOptions) {
+                    allSteps.push({ ...step, promotion });
+                }
+            }
+        }
+        return allSteps;
     }
 }
