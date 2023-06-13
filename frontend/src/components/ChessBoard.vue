@@ -7,7 +7,8 @@
           <chess-square class="col" v-for="column in processedColumns" :key="column" :row="row" :column="column"
             :piece="game?.getPieceAt(row, column) || undefined" :selected-square="selectedSquare"
             @mousedown="onSquareMouseDown" @mouseup="onSquareMouseUp"
-            :highlight="possibleMoves.some(sqr => isSameLocation({ row, column }, sqr))" />
+            :highlight="possibleMoves.some(sqr => isSameLocation({ row, column }, sqr))" 
+            @promotion="promotionSelection" :promotion-selection="promotionSquare && isSameLocation(promotionSquare, {row, column})"/>
         </div>
         <div class="row justify-between" style="position: relative;">
           <player-card class="row" :game="game" :color="flipped ? 'b' : 'w'" />
@@ -21,11 +22,11 @@
 
 <script lang="ts">
 import { defineComponent, PropType } from 'vue';
-import { rows, columns, Square, isSameLocation } from './chess-board';
+import { columns, isSameLocation, rows, Square } from './chess-board';
+import ChessGame, { Move } from './chess-game';
 import ChessSquare from './ChessSquare.vue';
-import ChessGame from './chess-game';
 import PlayerCard from './PlayerCard.vue';
-import { ChessPieceType } from './chess-pieces';
+import { ChessPieceFromType, ChessPieceType } from './chess-pieces';
 
 export default defineComponent({
   name: 'ChessBoard',
@@ -47,7 +48,9 @@ export default defineComponent({
       columns,
       boardsize: 60,
       selectedSquare: undefined as Square | undefined,
-      possibleMoves: [] as Square[]
+      possibleMoves: [] as Square[],
+      promotion: undefined as undefined | ChessPieceType,
+      promotionSquare: undefined as undefined | Square,
     };
   },
   computed: {
@@ -62,25 +65,31 @@ export default defineComponent({
     isSameLocation,
     onSquareMouseDown(square: Square) {
       const game = this.game;
-      if(this.selectedSquare && isSameLocation(this.selectedSquare, square)) {
+      if(!this.selectedSquare) {
+        this.selectedSquare = square;
+        if (!game) return;
+        this.possibleMoves = game?.getPossibleMovesFor(square, game.turn, game.chessBoard, true) || [];
+      } else if(this.selectedSquare && isSameLocation(this.selectedSquare, square)) {
         this.selectedSquare = undefined;
         this.possibleMoves = [];
         return;
-      }else if(this.selectedSquare) {
-        this.onSquareMouseUp(square);
-        return;
       }
-      this.selectedSquare = square;
-      if (!game) return;
-      this.possibleMoves = game?.getPossibleMovesFor(square, game.turn, game.chessBoard, true) || [];
-      return;
     },
-    onSquareMouseUp(square: Square) {
+    async onSquareMouseUp(square: Square) {
       if (!this.selectedSquare) {
+        return;
+      } else if (!this.selectedSquare.piece) {
+        this.selectedSquare = square;
         return;
       }
       const game = this.game;
-      if (game?.movePieceIfLegal(this.selectedSquare, square)) {
+      const move: Move = { from: this.selectedSquare, piece: this.selectedSquare.piece, row: square.row, column: square.column, takes: square.piece ?? undefined };
+      if (game?.isPromotion(move)) {
+        const promotionType = await this.getPromotionType(square);
+        if (!promotionType) return;
+        move.promotion = ChessPieceFromType(promotionType) ?? undefined;
+      }
+      if (game?.movePieceIfLegal(move)) {
         this.selectedSquare = undefined;
         this.possibleMoves = [];
       } else {
@@ -91,6 +100,19 @@ export default defineComponent({
     },
     moveFab(details: { evt: Event, delta: { x: number, y: number } }) {
       this.boardsize = Math.min(Math.max(this.boardsize + details.delta.x / 10, 20), 100);
+    },
+    async getPromotionType(square: Square) {
+      this.promotionSquare = square;
+      while (!this.promotion) {
+        await new Promise(resolve => setTimeout(resolve, 10));
+      }
+      this.promotionSquare = undefined;
+      const promotion = this.promotion;
+      this.promotion = undefined;
+      return promotion;
+    },
+    promotionSelection(type: ChessPieceType) {
+      this.promotion = type;
     },
   },
 })

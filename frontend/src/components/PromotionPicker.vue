@@ -1,16 +1,16 @@
 <template>
   <q-responsive ratio="1">
     <div style="display: grid;" v-if="playerColor === 'w'">
-      <q-img loading="eager" :src="WhiteQueen" style="grid-column: 1; grid-row: 1;" @click="$emit('select', ChessPieceType.whiteQueen)"/>
-      <q-img loading="eager" :src="WhiteRook" style="grid-column: 1; grid-row: 2;" @click="$emit('select', ChessPieceType.whiteRook)"/>
-      <q-img loading="eager" :src="WhiteBishop" style="grid-column: 2; grid-row: 1;" @click="$emit('select', ChessPieceType.whiteBishop)"/>
-      <q-img loading="eager" :src="WhiteKnight" style="grid-column: 2; grid-row: 2;" @click="$emit('select', ChessPieceType.whiteKnight)"/>
+      <q-img loading="eager" no-spinner :src="WhiteQueen" style="grid-column: 1; grid-row: 1;" @click="$emit('select', ChessPieceType.whiteQueen)"/>
+      <q-img loading="eager" no-spinner :src="WhiteRook" style="grid-column: 1; grid-row: 2;" @click="$emit('select', ChessPieceType.whiteRook)"/>
+      <q-img loading="eager" no-spinner :src="WhiteBishop" style="grid-column: 2; grid-row: 1;" @click="$emit('select', ChessPieceType.whiteBishop)"/>
+      <q-img loading="eager" no-spinner :src="WhiteKnight" style="grid-column: 2; grid-row: 2;" @click="$emit('select', ChessPieceType.whiteKnight)"/>
     </div>
     <div style="display: grid;" v-else>
-      <q-img loading="eager" :src="BlackQueen" style="grid-column: 1; grid-row: 1;" @click="$emit('select', ChessPieceType.blackQueen)"/>
-      <q-img loading="eager" :src="BlackRook" style="grid-column: 1; grid-row: 2;" @click="$emit('select', ChessPieceType.blackRook)"/>
-      <q-img loading="eager" :src="BlackBishop" style="grid-column: 2; grid-row: 1;" @click="$emit('select', ChessPieceType.blackBishop)"/>
-      <q-img loading="eager" :src="BlackKnight" style="grid-column: 2; grid-row: 2;" @click="$emit('select', ChessPieceType.blackKnight)"/>
+      <q-img loading="eager" no-spinner :src="BlackQueen" style="grid-column: 1; grid-row: 1;" @click="$emit('select', ChessPieceType.blackQueen)"/>
+      <q-img loading="eager" no-spinner :src="BlackRook" style="grid-column: 1; grid-row: 2;" @click="$emit('select', ChessPieceType.blackRook)"/>
+      <q-img loading="eager" no-spinner :src="BlackBishop" style="grid-column: 2; grid-row: 1;" @click="$emit('select', ChessPieceType.blackBishop)"/>
+      <q-img loading="eager" no-spinner :src="BlackKnight" style="grid-column: 2; grid-row: 2;" @click="$emit('select', ChessPieceType.blackKnight)"/>
     </div>
   </q-responsive>
 </template>
