@@ -5,7 +5,8 @@
         <player-card class="row" :game="game" :color="flipped ? 'w' : 'b'" />
         <div class="row" v-for="row in processedRows" :key="row">
           <chess-square class="col" v-for="column in processedColumns" :key="column" :row="row" :column="column"
-            :piece="game?.getPieceAt(row, column) || undefined" :selected-square="selectedSquare" @click="onSquareClick"
+            :piece="game?.getPieceAt(row, column) || undefined" :selected-square="selectedSquare"
+            @mousedown="onSquareMouseDown" @mouseup="onSquareMouseUp"
             :highlight="possibleMoves.some(sqr => isSameLocation({ row, column }, sqr))" />
         </div>
         <div class="row justify-between" style="position: relative;">
@@ -59,25 +60,26 @@ export default defineComponent({
   },
   methods: {
     isSameLocation,
-    onSquareClick(square: Square) {
+    onSquareMouseDown(square: Square) {
       const game = this.game;
-      if (!this.selectedSquare) {
-        this.selectedSquare = square;
-        if (!game) return;
-        this.possibleMoves = game?.getPossibleMovesFor(square, game.turn, game.chessBoard, true) || [];
-        return;
-      }
-      if (isSameLocation(this.selectedSquare, square)) {
-        // reset selected square
+      if(this.selectedSquare && isSameLocation(this.selectedSquare, square)) {
         this.selectedSquare = undefined;
         this.possibleMoves = [];
         return;
+      }else if(this.selectedSquare) {
+        this.onSquareMouseUp(square);
+        return;
       }
-      const isPromotionRow = square.row === rows[0] || square.row === rows.at(-1);
-      if (this.selectedSquare.piece?.toFen().toUpperCase() === 'P' && isPromotionRow) {
-        if (!game) return;
-        game.setPromotion(game.turn === 'w' ? ChessPieceType.whiteQueen : ChessPieceType.blackQueen);
+      this.selectedSquare = square;
+      if (!game) return;
+      this.possibleMoves = game?.getPossibleMovesFor(square, game.turn, game.chessBoard, true) || [];
+      return;
+    },
+    onSquareMouseUp(square: Square) {
+      if (!this.selectedSquare) {
+        return;
       }
+      const game = this.game;
       if (game?.movePieceIfLegal(this.selectedSquare, square)) {
         this.selectedSquare = undefined;
         this.possibleMoves = [];

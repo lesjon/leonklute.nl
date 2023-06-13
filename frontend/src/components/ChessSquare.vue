@@ -1,6 +1,6 @@
 <template>
   <q-responsive ratio="1">
-    <div :style="style" @click="onClick" style="display: grid;">
+    <div :style="style" style="display: grid;" @mousedown="onMouseDown" @mouseup="onMouseUp">
       <q-img loading="eager" :src="pieceImageFilename" v-if="piece" class="on-square" no-spinner/>
       <div class="highlight on-square" v-if="highlight" style="grid-column: 1; grid-row: 1;"></div>
       <div class="dot on-square" v-if="selected" style="grid-column: 1; grid-row: 1;"></div>
@@ -38,7 +38,7 @@ export default defineComponent({
       required: false,
     },
   },
-  emits: ['click'],
+  emits: ['mousedown', 'mouseup'],
   data() {
     return {
       columnLetters,
@@ -61,9 +61,13 @@ export default defineComponent({
     },
   },
   methods: {
-    onClick() {
+    onMouseDown() {
       const square: Square = { row: this.row, column: this.column, piece: this.piece };
-      this.$emit('click', square);
+      this.$emit('mousedown', square);
+    },
+    onMouseUp() {
+      const square: Square = { row: this.row, column: this.column, piece: this.piece };
+      this.$emit('mouseup', square);
     }
   }
 })
