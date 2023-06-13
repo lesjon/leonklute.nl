@@ -1,6 +1,6 @@
 <template>
   <q-page padding class="flex items-stretch q-gutter-md">
-    <motivation-component class="row" />
+    <motivation-component class="row"/>
     <photo-reel class="col fit" />
     <competences-component class="col" />
   </q-page>

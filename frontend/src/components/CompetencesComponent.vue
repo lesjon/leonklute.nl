@@ -1,6 +1,6 @@
 <template>
   <q-table :rows="competences" :columns="COLUMNS" title="Competenties" :rows-per-page-options="[0]" hide-pagination
-    hide-header />
+    hide-header :loading="loading"/>
 </template>
 
 <script lang="ts">
@@ -39,6 +39,11 @@ export default defineComponent({
   },
   mounted() {
     this.fetchTechnologies()
+  },
+  computed: {
+    loading() {
+      return this.competences.length === 0;
+    }
   },
   methods: {
     async fetchTechnologies() {
