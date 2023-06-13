@@ -98,10 +98,6 @@ export default class ChessGame {
     halfMove = '0';
     fullMove = '1';
     check = false;
-    private _promotion?: ChessPieceType | undefined;
-    public setPromotion(value: ChessPieceType | undefined) {
-        this._promotion = value;
-    }
     chessBoard: ChessBoard = new ChessBoard(8, 8);
     whitePlayer?: Player;
     blackPlayer?: Player;
@@ -259,9 +255,6 @@ export default class ChessGame {
                         break;
                     }
                     nextMove.castling = castling;
-                }
-                if (step.canPromote && (nextMove.row === rows[0] || nextMove.row === rows[7])) {
-                    nextMove.promotion = this._promotion ? chessPieceFromType(this._promotion) ?? undefined : undefined;
                 }
                 if (checkCheck) {
                     const newPosition = ChessGame.movePiece(this.chessBoard, nextMove.from!, nextMove);

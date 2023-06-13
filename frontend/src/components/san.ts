@@ -1,7 +1,7 @@
 import { C } from "app/dist/spa/assets/index.7ad02204";
 import { columnLetters } from "./chess-board";
 import { Move } from "./chess-game";
-import { ChessPieceType } from "./chess-pieces";
+import ChessPiece, { ChessPieceType } from "./chess-pieces";
 
 export enum SanFormat {
     Long = 'long',
@@ -26,8 +26,7 @@ export default class San {
         return '';
     }
 
-    pieceSymbol(move: Move) {
-        const piece = move.piece;
+    pieceSymbol(piece: ChessPiece) {
         switch (piece.getType()) {
             case ChessPieceType.whitePawn:
             case ChessPieceType.blackPawn:
@@ -71,13 +70,13 @@ export default class San {
         }
         if (move.shortCastle) { return 'O-O' + this.checkSymbol(move); }
         if (move.longCastle) { return 'O-O-O' + this.checkSymbol(move); }
-        return this.fromSymbol(move) + this.pieceSymbol(move) + this.takeSymbol(move) +
+        return this.fromSymbol(move) + this.pieceSymbol(move.piece) + this.takeSymbol(move) +
             columnLetters[move.column] + move.row + this.formatPromotion(move) + this.checkSymbol(move);
     }
 
     formatPromotion(move: Move) {
         if (move.promotion) {
-            return '=' + move.promotion.toFen();
+            return '=' + this.pieceSymbol(move.promotion);
         }
         return '';
     }

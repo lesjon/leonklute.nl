@@ -77,7 +77,7 @@ export default defineComponent({
       if (!this.selectedSquare) {
         return;
       } else if (!this.selectedSquare.piece) {
-        this.selectSquareAndCalculatePossibleMoves(square);
+        this.selectedSquare = square;
         return;
       }
       const game = this.game;
@@ -89,7 +89,9 @@ export default defineComponent({
       }
       if (game?.movePieceIfLegal(move)) {
         this.selectedSquare = undefined;
-        this.possibleMoves = [];
+        this.possibleMoves = [];        
+        this.promotionSquare = undefined;
+        this.promotion = undefined;
       } else {
         this.selectSquareAndCalculatePossibleMoves(square);
       }
@@ -99,12 +101,10 @@ export default defineComponent({
     },
     async getPromotionType(square: Square) {
       this.promotionSquare = square;
-      while (!this.promotion) {
+      while (!this.promotion && this.promotionSquare && isSameLocation(this.promotionSquare , square)) {
         await new Promise(resolve => setTimeout(resolve, 10));
       }
-      this.promotionSquare = undefined;
       const promotion = this.promotion;
-      this.promotion = undefined;
       return promotion;
     },
     promotionSelection(type: ChessPieceType) {
