@@ -1,5 +1,5 @@
 <template>
-  <div :style="`max-width: ${boardsize}vh;`">
+  <div :style="`max-width: ${boardsize}vh; user-select: none`">
     <q-responsive :ratio="8 / 9" class="col">
       <div>
         <player-card class="row" :game="game" :color="flipped ? 'w' : 'b'" />

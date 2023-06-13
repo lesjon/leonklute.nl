@@ -4,32 +4,39 @@ import Player from './player';
 
 class MoveNode {
     move: Move;
+    parent?: MoveNode;
     children: MoveNode[];
-    constructor(move: Move) {
+    constructor(move: Move, parent?: MoveNode) {
         this.move = move;
         this.children = [];
+        this.parent = parent;
     }
     getMove() {
         return this.move;
     }
-    getChildren() {
+    getNextMoves() {
         return this.children;
     }
-    addChild(moveNode: MoveNode) {
+    addNextMove(moveNode: MoveNode) {
+        moveNode.parent = this;
         this.children.push(moveNode);
     }
-    getNextMainLine() {
+    getNextMove() {
         return this.children.at(0);
     }
 
     getMainLine() {
         const mainLine: Move[] = [this.move];
-        let currentNode: MoveNode | undefined = this.getNextMainLine();
+        let currentNode: MoveNode | undefined = this.getNextMove();
         while (currentNode) {
             mainLine.push(currentNode.move);
-            currentNode = currentNode.getNextMainLine();
+            currentNode = currentNode.getNextMove();
         }
         return mainLine;
+    }
+
+    getPrevious() {
+        return this.parent;
     }
 }
 
@@ -147,7 +154,7 @@ export default class ChessGame {
         this.updateCastling(move);
         const moveNode = new MoveNode(move);
         if (this.currentMoveNode) {
-            this.currentMoveNode?.addChild(moveNode);
+            this.currentMoveNode?.addNextMove(moveNode);
             this.currentMoveNode = moveNode;
         } else {
             this.moveTree.push(moveNode);
@@ -182,6 +189,24 @@ export default class ChessGame {
             }
         }
         return enPassant;
+    }
+
+    moveBack() {
+        if (!this.currentMoveNode) {
+            return;
+        }
+        const move = this.currentMoveNode.move;
+        if (move.castling) {
+            const kingMovedChessBoard = ChessGame.movePiece(this.chessBoard, move.castling.kingMove.from!, move.castling.kingMove);
+            this.chessBoard = ChessGame.movePiece(kingMovedChessBoard, move.castling.rookMove.from!, move.castling.rookMove);
+        } else {
+            this.chessBoard = ChessGame.movePiece(this.chessBoard, move, move.from!);
+        }
+        if (move.promotion) {
+            this.chessBoard.setPiece(move.from!, move.piece);
+        }
+        this.turn = this.turn === 'w' ? 'b' : 'w';
+        this.currentMoveNode = this.currentMoveNode.getPrevious();
     }
 
     movePieceIfLegal(moveToValidate: Move) {
