@@ -1,14 +1,13 @@
 <template>
-  <q-card>
-    <q-card-actions>
+  <q-card style="width: 80ch; ">
+    <q-card-actions align="between">
       <q-btn class="q-mr-md" color="primary" label="New Game" @click="$emit('new-game')" />
       <q-btn class="q-mr-md" color="primary" label="Flip Board" @click="$emit('flip')" />
+      <q-btn flat @click="expand = !expand" :icon="expand ? 'expand_less' : 'expand_more'" />
     </q-card-actions>
-    <q-card-section @click="copyFen" style="width: 90ch; max-width: inherit;">
-      <q-input outlined readonly dense :model-value="fen" />
-    </q-card-section>
-    <q-card-section>
-      <q-table :rows="mainLine" :columns="COLUMNS" :rows-per-page-options="[0]" hide-pagination hide-no-data/>
+    <q-card-section v-if="expand" style="max-width: inherit;" class="q-gutter-sm">
+      <q-input outlined readonly dense :model-value="fen"  @click="copyFen"/>
+      <q-table :rows="mainLine" :columns="COLUMNS" :rows-per-page-options="[0]" hide-no-data/>
     </q-card-section>
   </q-card>
 </template>
@@ -63,7 +62,8 @@ export default defineComponent({
           format: (move) => san.formatMove(move)
         },
       ] as QTableColumn[],
-      san
+      san,
+      expand: true,
     };
   },
   computed: {
