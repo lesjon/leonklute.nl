@@ -187,7 +187,9 @@ export default class ChessGame {
         return enPassant;
     }
 
-    movePieceIfLegal(from: Square, to: Square) {
+    movePieceIfLegal(moveToValidate: Move) {
+        const from: Square = moveToValidate.from ?? { row: 0, column: 0 };
+        const to: Move = moveToValidate;
         if (!from.piece) {
             return false;
         }
@@ -195,19 +197,19 @@ export default class ChessGame {
             return false;
         }
         const possibleMoves = this.getPossibleMovesFor(from, this.turn, this.chessBoard, true);
-        const move: Move | undefined = possibleMoves.find(move => isSameLocation(move, to));
-
-        if (!move) {
+        const validatedMove: Move | undefined = possibleMoves.find(move => isSameLocation(move, to));
+        if (!validatedMove) {
             return false;
         }
-        if (move.enPassant?.squareToTake) {
-            this.chessBoard.setPiece(move.enPassant.squareToTake, null);
+        validatedMove.promotion = moveToValidate.promotion;
+        if (validatedMove.enPassant?.squareToTake) {
+            this.chessBoard.setPiece(validatedMove.enPassant.squareToTake, null);
         }
-        if (!to.piece) {
-            this.move(move);
+        if (!to.takes) {
+            this.move(validatedMove);
             return true;
-        } else if (from.piece.isOpponent(to.piece)) {
-            this.move(move);
+        } else if (from.piece.isOpponent(to.takes)) {
+            this.move(validatedMove);
             return true;
         }
         return false;
@@ -278,6 +280,26 @@ export default class ChessGame {
         });
 
         return possibleMoves;
+    }
+
+    isPromotion(moveWithoutPromotion: Move) {
+        if (!moveWithoutPromotion.from) {
+            return false;
+        }
+        const piece = this.chessBoard.getPiece(moveWithoutPromotion.from);
+        if (!piece) {
+            return false;
+        }
+        if (piece.getType() !== ChessPieceType.whitePawn && piece.getType() !== ChessPieceType.blackPawn) {
+            return false;
+        }
+        if (piece.getColor() === 'w' && moveWithoutPromotion.row !== rows[rows.length - 1]) {
+            return false;
+        }
+        if (piece.getColor() === 'b' && moveWithoutPromotion.row !== rows[0]) {
+            return false;
+        }
+        return true;
     }
 
     getOptionalCastling(move: Move): Castling | null {
