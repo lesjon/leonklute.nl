@@ -266,7 +266,7 @@ export default class ChessGame {
                     const check = this.isInCheck(this.turn, newPosition);
                     nextMove.check = this.isInCheck(this.turn === 'w' ? 'b' : 'w', newPosition);
                     if (check) {
-                        break;
+                        continue;
                     }
                 }
                 possibleMoves.push(nextMove);
