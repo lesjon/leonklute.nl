@@ -150,7 +150,7 @@ export default class ChessGame {
     }
 
     getCurrentMoveNode() {
-        return this.currentMoveNode?.getMainLine().at(-1);
+        return this.currentMoveNode;
     }
 
     getPieceAt(row: number, column: number) {
@@ -178,14 +178,6 @@ export default class ChessGame {
             }
         }
         this.updateCastling(move);
-        if (this.currentMoveNode) {
-            const nextMoveNode = this.currentMoveNode.addNextMove(move);
-            this.currentMoveNode = nextMoveNode;
-        } else {
-            const root = new MoveNode(move, ".1");
-            this.moveTree.push(root);
-            this.currentMoveNode = root;
-        }
     }
 
     private static movePiece(chessBoard: ChessBoard, from: Square, to: Square) {
@@ -231,9 +223,42 @@ export default class ChessGame {
         if (move.promotion) {
             this.chessBoard.setPiece(move.from!, move.piece);
         }
+        if (move.takes) {
+            if (move.enPassant?.squareToTake) {
+                this.chessBoard.setPiece(move.enPassant.squareToTake, move.takes);
+            } else {
+                this.chessBoard.setPiece(move, move.takes);
+            }
+        }
         this.turn = this.turn === 'w' ? 'b' : 'w';
         this.currentMoveNode = this.currentMoveNode.getPrevious();
     }
+
+    canMoveBack() {
+        return this.currentMoveNode !== undefined;
+    }
+
+    canMoveForward() {
+        return this.getNextMove() !== undefined;
+    }
+
+    getNextMove(): MoveNode | undefined {
+        if (this.currentMoveNode) {
+            return this.currentMoveNode.getNextMove();
+        }
+        const rootMove = this.moveTree.at(0);
+        return rootMove;
+    }
+    moveForward() {
+        const nextMove = this.getNextMove();
+        if (!nextMove) {
+            return;
+        }
+        const move = nextMove.move;
+        this.move(move);
+        this.currentMoveNode = nextMove;
+    }
+
 
     movePieceIfLegal(moveToValidate: Move) {
         const from: Square = moveToValidate.from ?? { row: 0, column: 0 };
@@ -255,12 +280,25 @@ export default class ChessGame {
         }
         if (!to.takes) {
             this.move(validatedMove);
+            this.updateMoveTree(validatedMove);
             return true;
         } else if (from.piece.isOpponent(to.takes)) {
             this.move(validatedMove);
+            this.updateMoveTree(validatedMove);
             return true;
         }
         return false;
+    }
+
+    private updateMoveTree(move: Move) {
+        if (this.currentMoveNode) {
+            const nextMoveNode = this.currentMoveNode.addNextMove(move);
+            this.currentMoveNode = nextMoveNode;
+        } else {
+            const root = new MoveNode(move, ".1");
+            this.moveTree.push(root);
+            this.currentMoveNode = root;
+        }
     }
 
     getPossibleMovesFor(from: Square, playerColor: PlayerColor, chessBoard: ChessBoard, checkCheck: boolean): Move[] {
@@ -310,7 +348,7 @@ export default class ChessGame {
                 }
                 if (step.promotion && this.isPromotion(nextMove)) {
                     nextMove.promotion = chessPieceFromType(step.promotion) ?? undefined;
-                }else if (step.promotion && !this.isPromotion(nextMove)){
+                } else if (step.promotion && !this.isPromotion(nextMove)) {
                     break;
                 }
                 if (checkCheck) {

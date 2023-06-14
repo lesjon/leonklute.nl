@@ -18,6 +18,16 @@
             {{ props.value }}
           </q-td>
         </template>
+        <template v-slot:pagination>
+          <q-tr>
+            <q-td colspan="3" class="text-right">
+              <q-btn flat icon="chevron_left" @click="game?.moveBack()" :disable="!game?.canMoveBack()" />
+            </q-td>
+            <q-td colspan="3" class="text-right">
+              <q-btn flat icon="chevron_right" @click="game?.moveForward()" :disable="!game?.canMoveForward()" />
+            </q-td>
+          </q-tr>
+        </template>
       </q-table>
     </q-card-section>
   </q-card>
