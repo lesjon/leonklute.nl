@@ -7,14 +7,14 @@
     </q-card-actions>
     <q-card-section v-if="expand" style="max-width: inherit;" class="q-gutter-sm">
       <q-input outlined readonly dense :model-value="fen" @click="copyFen" />
-      <q-table :rows="mainLine" :columns="COLUMNS" :rows-per-page-options="[0]" hide-no-data>
+      <q-table :rows="mainLine" :columns="COLUMNS" :rows-per-page-options="[0]" hide-no-data dense>
         <template v-slot:body-cell-moveWhite="props">
-          <q-td :props="props" :class="(props.row.highlightWhite) ? 'bg-accent' : ''">
+          <q-td :props="props" style="font-size: large;" :class="(props.row.highlightWhite) ? 'bg-accent' : ''">
             {{ props.value }}
           </q-td>
         </template>
         <template v-slot:body-cell-moveBlack="props">
-          <q-td :props="props" :class="(props.row.highlightBlack) ? 'bg-accent' : ''">
+          <q-td :props="props" style="font-size: large;" :class="(props.row.highlightBlack) ? 'bg-accent' : ''">
             {{ props.value }}
           </q-td>
         </template>
@@ -113,7 +113,7 @@ export default defineComponent({
           moveWhite: indexedMoves[i].moveNode.move,
           moveBlack: indexedMoves[i + 1]?.moveNode.move,
           highlightWhite: indexedMoves[i].moveNode.id === currentMove?.id,
-          highlightBlack: indexedMoves[i + 1]?.moveNode.id === currentMove?.id
+          highlightBlack: indexedMoves[i + 1] && indexedMoves[i + 1]?.moveNode.id === currentMove?.id
         });
       }
       return movesWithIndex;

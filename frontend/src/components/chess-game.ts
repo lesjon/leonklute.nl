@@ -4,8 +4,6 @@ import MoveNode from './move-tree';
 import Move, { Castling, EnPassant } from './chess-move';
 import Player from './player';
 
-
-
 export class CastlingState {
     whiteShort?: Castling;
     whiteLong?: Castling;
@@ -18,7 +16,6 @@ export class CastlingState {
         this.blackLong = blackLong;
     }
 }
-
 
 export default class ChessGame {
     turn: PlayerColor = 'w';
@@ -184,18 +181,7 @@ export default class ChessGame {
         return false;
     }
 
-    private updateMoveTree(move: Move) {
-        if (this.currentMoveNode) {
-            const nextMoveNode = this.currentMoveNode.addNextMove(move);
-            this.currentMoveNode = nextMoveNode;
-        } else {
-            const root = new MoveNode(move, ".1");
-            this.moveTree.push(root);
-            this.currentMoveNode = root;
-        }
-    }
-
-    getPossibleMovesFor(from: Square, playerColor: PlayerColor, chessBoard: ChessBoard, checkCheck: boolean): Move[] {
+    getPossibleMovesFor(from: Square, playerColor: PlayerColor, chessBoard: ChessBoard, checkCheck: boolean, excludeCastling?: boolean): Move[] {
         const possibleMoves: Move[] = [];
         const piece = chessBoard.getPiece(from);
         playerColor = playerColor;
@@ -233,7 +219,10 @@ export default class ChessGame {
                 if (!(attackedPiece || canEnPassant) && step.requiresTake) {
                     break;
                 }
-                if ((step.shortCastle || step.longCastle)) {
+                if ((step.shortCastle || step.longCastle) ) {
+                    if (excludeCastling) {
+                        break;
+                    }
                     const castling = this.getOptionalCastling(nextMove);
                     if (!castling) {
                         break;
@@ -267,6 +256,21 @@ export default class ChessGame {
         return possibleMoves;
     }
 
+    getPossibleMovesExcludingCastlingFor(from: Square, playerColor: PlayerColor, chessBoard: ChessBoard, checkCheck: boolean): Move[] {
+        return this.getPossibleMovesFor(from, playerColor, chessBoard, checkCheck, true);
+    }
+
+    isInCheck(turn: PlayerColor, chessBoard: ChessBoard): boolean {
+        let moves = this.getAllMovesExcludingCastling(turn === 'w' ? 'b' : 'w', chessBoard, false);
+        const king = chessBoard.getKing(turn);
+        if (!king) {
+            return false;
+        }
+        moves = moves.filter(move => isSameLocation(move, king));
+        const check = moves.length > 0;
+        return check
+    }
+
     isPromotion(moveWithoutPromotion: Move) {
         if (!moveWithoutPromotion.from) {
             return false;
@@ -287,7 +291,18 @@ export default class ChessGame {
         return true;
     }
 
-    getOptionalCastling(move: Move): Castling | null {
+    private updateMoveTree(move: Move) {
+        if (this.currentMoveNode) {
+            const nextMoveNode = this.currentMoveNode.addNextMove(move);
+            this.currentMoveNode = nextMoveNode;
+        } else {
+            const root = new MoveNode(move, ".1");
+            this.moveTree.push(root);
+            this.currentMoveNode = root;
+        }
+    }
+
+    private getOptionalCastling(move: Move): Castling | null {
         if (move.piece.hasMoved()) {
             return null;
         }
@@ -301,7 +316,7 @@ export default class ChessGame {
         return this.getOptionalCastlingForKing(move, kingSquare);
     }
 
-    getOptionalCastlingForKing(move: Move, kingSquare: SquareWithPiece): Castling | null {
+    private getOptionalCastlingForKing(move: Move, kingSquare: SquareWithPiece): Castling | null {
         if (!this.castling) {
             return null;
         }
@@ -318,8 +333,15 @@ export default class ChessGame {
             if (!rook) {
                 return null;
             }
+            if (this.isInCheck(move.piece.getColor(), this.chessBoard)) {
+                return null;
+            }
             for (let col = kingSquare.column + 1; col < rook.column; col++) {
                 if (this.chessBoard.getPiece({ row: kingSquare.row, column: col })) {
+                    return null;
+                }
+                const testCheckChessBoard = ChessGame.movePiece(this.chessBoard, { row: kingSquare.row, column: kingSquare.column }, { row: kingSquare.row, column: col });
+                if (this.isInCheck(move.piece.getColor(), testCheckChessBoard)) {
                     return null;
                 }
             }
@@ -329,8 +351,15 @@ export default class ChessGame {
             if (!rook) {
                 return null;
             }
+            if (this.check) {
+                return null;
+            }
             for (let col = rook.column + 1; col < kingSquare.column; col++) {
                 if (this.chessBoard.getPiece({ row: kingSquare.row, column: col })) {
+                    return null;
+                }
+                const testCheckChessBoard = ChessGame.movePiece(this.chessBoard, { row: kingSquare.row, column: kingSquare.column }, { row: kingSquare.row, column: col });
+                if (this.isInCheck(move.piece.getColor(), testCheckChessBoard)) {
                     return null;
                 }
             }
@@ -397,7 +426,7 @@ export default class ChessGame {
         }
     }
 
-    getAllMoves(color: PlayerColor, chessBoard: ChessBoard, checkCheck: boolean): Move[] {
+    private getAllMoves(color: PlayerColor, chessBoard: ChessBoard, checkCheck: boolean): Move[] {
         const squares = chessBoard.getAllSquares();
         const moves: Move[] = [];
         squares.forEach(square => {
@@ -408,14 +437,18 @@ export default class ChessGame {
         return moves;
     }
 
-    isInCheck(turn: PlayerColor, chessBoard: ChessBoard): boolean {
-        let moves = this.getAllMoves(turn === 'w' ? 'b' : 'w', chessBoard, false);
-        const king = chessBoard.getKing(turn);
-        if (!king) {
-            return false;
-        }
-        moves = moves.filter(move => isSameLocation(move, king));
-        const check = moves.length > 0;
-        return check
+    /*
+     * It is the same as getAllMoves, but it excludes castling
+     * moves, needed to prevent exceeding call stack.
+     */
+    private getAllMovesExcludingCastling(color: PlayerColor, chessBoard: ChessBoard, checkCheck: boolean): Move[] {
+        const squares = chessBoard.getAllSquares();
+        const moves: Move[] = [];
+        squares.forEach(square => {
+            this.getPossibleMovesExcludingCastlingFor(square, color, chessBoard, checkCheck).forEach(move => {
+                moves.push(move);
+            });
+        });
+        return moves;
     }
 }
