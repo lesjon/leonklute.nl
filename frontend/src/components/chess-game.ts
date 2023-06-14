@@ -110,8 +110,8 @@ export default class ChessGame {
         }
         const move = this.currentMoveNode.move;
         if (move.castling) {
-            const kingMovedChessBoard = ChessGame.movePiece(this.chessBoard, move.castling.kingMove.from!, move.castling.kingMove);
-            this.chessBoard = ChessGame.movePiece(kingMovedChessBoard, move.castling.rookMove.from!, move.castling.rookMove);
+            const kingMovedChessBoard = ChessGame.movePiece(this.chessBoard, move.castling.kingMove, move.castling.kingMove.from!);
+            this.chessBoard = ChessGame.movePiece(kingMovedChessBoard, move.castling.rookMove, move.castling.rookMove.from!);
         } else {
             this.chessBoard = ChessGame.movePiece(this.chessBoard, move, move.from!);
         }
