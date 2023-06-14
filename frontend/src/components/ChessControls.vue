@@ -36,7 +36,8 @@
 <script lang="ts">
 import { copyToClipboard, QTableColumn } from 'quasar';
 import { defineComponent, PropType } from 'vue';
-import ChessGame, { Move } from './chess-game';
+import ChessGame from './chess-game';
+import Move from './chess-move';
 import Fen from './fen';
 import San from './san';
 import { columnLetters } from './chess-board';

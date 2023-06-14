@@ -1,6 +1,7 @@
 import ChessBoard from './chess-board';
-import ChessGame, { Castling, CastlingState, EnPassant, Move } from './chess-game';
-import { ChessPieceFromType, ChessPieceType, PlayerColor } from './chess-pieces';
+import ChessGame, { CastlingState } from './chess-game';
+import Move, { Castling, EnPassant } from './chess-move';
+import { chessPieceFromType, ChessPieceType, PlayerColor } from './chess-pieces';
 
 
 const fenToPiece = (fen: string): ChessPieceType | null => {
@@ -59,7 +60,7 @@ export default class Fen {
                     if (type === null) {
                         throw new Error(`Invalid piece type: ${cell}`);
                     }
-                    return ChessPieceFromType(type);
+                    return chessPieceFromType(type);
                 } else {
                     return Array.from({ length: Number(cell) }, () => null);
                 }

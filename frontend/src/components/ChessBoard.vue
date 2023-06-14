@@ -23,10 +23,11 @@
 <script lang="ts">
 import { defineComponent, PropType } from 'vue';
 import { columns, isSameLocation, rows, Square } from './chess-board';
-import ChessGame, { Move } from './chess-game';
+import ChessGame from './chess-game';
+import Move from './chess-move';
+import { chessPieceFromType, ChessPieceType } from './chess-pieces';
 import ChessSquare from './ChessSquare.vue';
 import PlayerCard from './PlayerCard.vue';
-import { ChessPieceFromType, ChessPieceType } from './chess-pieces';
 
 export default defineComponent({
   name: 'ChessBoard',
@@ -87,7 +88,7 @@ export default defineComponent({
       if (game?.isPromotion(move)) {
         const promotionType = await this.getPromotionType(square);
         if (!promotionType) return;
-        move.promotion = ChessPieceFromType(promotionType) ?? undefined;
+        move.promotion = chessPieceFromType(promotionType) ?? undefined;
       }
       if (game?.movePieceIfLegal(move)) {
         this.selectedSquare = undefined;

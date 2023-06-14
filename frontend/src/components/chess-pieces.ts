@@ -76,7 +76,7 @@ export default interface ChessPiece {
     clone(): ChessPiece;
 }
 
-export const ChessPieceFromType = (pieceType: ChessPieceType): ChessPiece | null => {
+export const chessPieceFromType = (pieceType: ChessPieceType): ChessPiece | null => {
     switch (pieceType) {
         case ChessPieceType.whiteKing:
             return new King(pieceType);
@@ -142,7 +142,7 @@ abstract class ChessPieceBase implements ChessPiece {
     }
 
     clone(): ChessPiece {
-        const newPiece = ChessPieceFromType(this.pieceType);
+        const newPiece = chessPieceFromType(this.pieceType);
         if (!newPiece) {
             throw new Error(`Invalid piece type: ${this.pieceType}`);
         }
