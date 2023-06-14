@@ -140,9 +140,8 @@ export default class ChessGame {
     currentMoveNode: MoveNode | undefined = undefined;
 
     constructor() {
-        this.blackPlayer = new Player('black');
-        this.whitePlayer = new Player('white');
-        this.blackPlayer.title = 'GM';
+        this.blackPlayer = new Player('black', 1, 'NB');
+        this.whitePlayer = new Player('white', 0);
     }
 
     getMainLine() {
