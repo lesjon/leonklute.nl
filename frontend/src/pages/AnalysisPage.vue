@@ -8,6 +8,7 @@
 <script lang="ts">
 import ChessBoard from 'src/components/ChessBoard.vue';
 import ChessControls from 'src/components/ChessControls.vue';
+import ChessGame from 'src/components/chess-game';
 import Fen from 'src/components/fen';
 import { defineComponent } from 'vue';
 
@@ -17,7 +18,7 @@ export default defineComponent({
     ChessBoard, ChessControls
   },
   data() {
-    const game = Fen.gameFromStartPosition();
+    const game: ChessGame = Fen.gameFromStartPosition();
     return {
       game,
       flipped: false,

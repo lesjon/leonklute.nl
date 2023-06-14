@@ -1,7 +1,7 @@
 import ChessBoard from './chess-board';
 import ChessGame, { CastlingState } from './chess-game';
 import Move, { Castling, EnPassant } from './chess-move';
-import ChessPiece, { chessPieceFromType, ChessPieceType, PlayerColor } from './chess-pieces';
+import { ChessPieceType, PlayerColor, chessPieceFromType } from './chess-pieces';
 
 
 const fenToPiece = (fen: string): ChessPieceType | null => {
@@ -45,7 +45,7 @@ export default class Fen {
     static fenParser(fen: string): ChessGame {
         const fenArray = fen.split(' ');
         const board = fenArray[0];
-        const game = new ChessGame();
+        const game: ChessGame = new ChessGame();
         game.turn = fenArray[1] as PlayerColor;
         game.enPassant = new EnPassant(fenArray[3]);
         game.halfMove = fenArray[4];

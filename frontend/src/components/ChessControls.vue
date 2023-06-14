@@ -52,37 +52,34 @@ interface MovesWithIndex {
 
 const san = new San();
 
-const
-  COLUMNS: QTableColumn[] = [
-    {
-      name: 'index',
-      label: '#',
-      field: 'index',
-      align: 'left',
-      style: 'width: 3ch',
-    },
-    {
-      name: 'moveWhite',
-      label: 'White',
-      field: 'moveWhite',
-      align: 'left',
-      format: (move) => san.formatMove(move)
-    },
-    {
-      name: 'moveBlack',
-      label: 'Black',
-      field: 'moveBlack',
-      align: 'left',
-      format: (move) => san.formatMove(move)
-    }
-  ]
+const COLUMNS: QTableColumn[] = [
+  {
+    name: 'index',
+    label: '#',
+    field: 'index',
+    align: 'left',
+    style: 'width: 3ch',
+  },
+  {
+    name: 'moveWhite',
+    label: 'White',
+    field: 'moveWhite',
+    align: 'left',
+    format: (move) => san.formatMove(move)
+  },
+  {
+    name: 'moveBlack',
+    label: 'Black',
+    field: 'moveBlack',
+    align: 'left',
+    format: (move) => san.formatMove(move)
+  }
+]
 
 export default defineComponent({
   name: 'ChessControls',
   props: {
-    game: {
-      type: Object as PropType<ChessGame>,
-    }
+    game: ChessGame as PropType<ChessGame>,
   },
   emits: ['flip', 'new-game'],
   data() {
@@ -104,8 +101,8 @@ export default defineComponent({
       if (!this.game) {
         return [];
       }
-      const currentMove = this.game.getCurrentMoveNode();
-      const indexedMoves = this.game?.getMainLine()?.map((moveNode, index) => { return { index, moveNode: moveNode } }) ?? [];
+      const currentMove = this.game.moveTree.getCurrentNode();
+      const indexedMoves = this.game.moveTree.getMainLine()?.map((moveNode, index) => { return { index, moveNode: moveNode } }) ?? [];
       const movesWithIndex: MovesWithIndex[] = [];
       for (let i = 0; i < indexedMoves.length; i += 2) {
         movesWithIndex.push({

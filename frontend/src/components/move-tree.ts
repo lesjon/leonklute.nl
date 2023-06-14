@@ -1,25 +1,108 @@
 import Move from "./chess-move";
 
-export default class MoveNode {
+export default class MoveTree {
+    root?: MoveNode;
+    path: MoveNode[];
+    constructor(root?: MoveNode) {
+        this.root = root;
+        this.path = root ? [root] : [];
+    }
+
+    getRoot() {
+        return this.root;
+    }
+
+    getCurrentNode() {
+        return this.path.at(-1);
+    }
+
+    stepBack() {
+        const popped = this.path.pop();
+        return this.getCurrentNode();
+    }
+
+    canStepForward() {
+        return this.getNextMove() !== undefined;
+    }
+
+    stepForward() {
+        const nextNode = this.getNextMove();
+        if (nextNode) {
+            this.path.push(nextNode);
+        }
+        return this.getCurrentNode();
+    }
+
+    addNextMove(move: Move) {
+        if (!this.root) {
+            this.root = new MoveNode(move, '1');
+            this.path.push(this.root);
+            return;
+        }
+        const currentNode = this.getCurrentNode();
+        if (!currentNode) {
+            const rootNode = new MoveNode(move, '1');
+            this.root = rootNode;
+            this.path.push(rootNode);
+            return;
+        }
+        this.path.push(currentNode.addNextMove(move));
+        return this.getCurrentNode();
+    }
+
+    getPath() {
+        return this.path;
+    }
+
+    getMainLine() {
+        const mainLine: MoveNode[] = [];
+        let currentNode = this.root;
+        while (currentNode) {
+            mainLine.push(currentNode);
+            currentNode = currentNode.getNextMove();
+        }
+        return mainLine;
+    }
+
+    getNextMoves() : MoveNode[] {
+        const currentNode = this.getCurrentNode();
+        if (!currentNode) {
+            return [];
+        }
+        return currentNode.getChildren();
+    }
+
+    getNextMove() {
+        const currentNode = this.getCurrentNode();
+        if (!currentNode) return this.root;
+        return currentNode.getNextMove();
+    }
+
+    cansStepForward() {
+        return this.getNextMove() !== undefined;
+    }
+
+    canStepBack() {
+        return this.path.length > 0;
+    }
+}
+
+export class MoveNode {
     id: string;
     move: Move;
-    parent?: MoveNode;
     children: MoveNode[];
-    constructor(move: Move, id: string, parent?: MoveNode) {
+    constructor(move: Move, id: string) {
         this.id = id;
         this.move = move;
         this.children = [];
-        this.parent = parent;
     }
-    getMove() {
-        return this.move;
-    }
-    getNextMoves() {
+
+    getChildren() {
         return this.children;
     }
-    addNextMoveNode(moveNode: MoveNode) {
-        moveNode.parent = this;
-        this.children.push(moveNode);
+
+    getMove() {
+        return this.move;
     }
 
     getNumberOfLines() {
@@ -34,32 +117,17 @@ export default class MoveNode {
             idInt++;
             return this.id.substring(0, lastIndexOfDot + 1) + idInt;
         }
-        return this.id + new Array(this.getNumberOfLines).join('.') + '1';
+        return this.id + new Array(getNumberOfLines).join('.') + '1';
     }
-
 
     addNextMove(move: Move) {
         const newId = this.createNextMoveIndex();
-        const moveNode = new MoveNode(move, newId, this);
+        const moveNode = new MoveNode(move, newId);
         this.children.push(moveNode);
         return moveNode;
     }
 
     getNextMove() {
         return this.children.at(0);
-    }
-
-    getMainLine() {
-        const mainLine: MoveNode[] = [this];
-        let currentNode: MoveNode | undefined = this.getNextMove();
-        while (currentNode) {
-            mainLine.push(currentNode);
-            currentNode = currentNode.getNextMove();
-        }
-        return mainLine;
-    }
-
-    getPrevious() {
-        return this.parent;
     }
 }

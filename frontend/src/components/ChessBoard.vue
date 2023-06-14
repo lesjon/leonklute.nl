@@ -5,7 +5,7 @@
         <player-card class="row" :game="game" :color="flipped ? 'w' : 'b'" />
         <div class="row" v-for="row in processedRows" :key="row">
           <chess-square class="col" v-for="column in processedColumns" :key="column" :row="row" :column="column"
-            :piece="game?.getPieceAt(row, column) || undefined" :selected-square="selectedSquare"
+            :piece="game?.getPieceAt(row, column)" :selected-square="selectedSquare"
             @mousedown="onSquareMouseDown" @mouseup="onSquareMouseUp"
             :highlight="possibleMoves.some(sqr => isSameLocation({ row, column }, sqr))" 
             @promotion="promotionSelection" :promotion-selection="promotionSquare && isSameLocation(promotionSquare, {row, column})"/>
@@ -35,9 +35,7 @@ export default defineComponent({
     ChessSquare, PlayerCard
   },
   props: {
-    game: {
-      type: Object as PropType<ChessGame>,
-    },
+    game: ChessGame as PropType<ChessGame>,
     flipped: {
       type: Boolean,
       default: false,

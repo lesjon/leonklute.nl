@@ -1,7 +1,7 @@
 import ChessBoard, { columnLetters, columns, isSameLocation, rows, Square, SquareWithPiece } from './chess-board';
-import { chessPieceFromType, ChessPieceType, PlayerColor } from './chess-pieces';
-import MoveNode from './move-tree';
 import Move, { Castling, EnPassant } from './chess-move';
+import { chessPieceFromType, ChessPieceType, PlayerColor } from './chess-pieces';
+import MoveTree, {MoveNode} from './move-tree';
 import Player from './player';
 
 export class CastlingState {
@@ -17,7 +17,8 @@ export class CastlingState {
     }
 }
 
-export default class ChessGame {
+
+export default class ChessGame{
     turn: PlayerColor = 'w';
     castling?: CastlingState;
     enPassant = new EnPassant('-');
@@ -29,20 +30,11 @@ export default class ChessGame {
     blackPlayer?: Player;
     winner?: Player;
 
-    moveTree: MoveNode[] = [];
-    currentMoveNode: MoveNode | undefined = undefined;
+    moveTree: MoveTree = new MoveTree();
 
     constructor() {
         this.blackPlayer = new Player('black', 1, 'NB');
         this.whitePlayer = new Player('white', 0);
-    }
-
-    getMainLine() {
-        return this.moveTree.at(0)?.getMainLine();
-    }
-
-    getCurrentMoveNode() {
-        return this.currentMoveNode;
     }
 
     getPieceAt(row: number, column: number) {
@@ -72,40 +64,12 @@ export default class ChessGame {
         this.updateCastling(move);
     }
 
-    private static movePiece(chessBoard: ChessBoard, from: Square, to: Square) {
-        const newChessBoard = chessBoard.clone();
-        const piece = newChessBoard.getPiece(from);
-        piece?.setMoved();
-        newChessBoard.setSquare({ row: from.row, column: from.column, piece: null });
-        newChessBoard.setPiece({ row: to.row, column: to.column }, piece);
-        return newChessBoard;
-    }
-
-    static computeEnPassent(move: Move) {
-        const { from, row, column, piece } = move;
-        let enPassant = new EnPassant('-');
-        if (!from) {
-            return enPassant;
-        }
-        const rowDelta = row - from.row;
-        if (piece?.toFen().toLowerCase() === 'p') {
-            switch (rowDelta) {
-                case 2:
-                    enPassant = new EnPassant(`${columnLetters[column]}${row - 1}`, move);
-                    break;
-                case -2:
-                    enPassant = new EnPassant(`${columnLetters[column]}${row + 1}`, move);
-                    break;
-            }
-        }
-        return enPassant;
-    }
-
     moveBack() {
-        if (!this.currentMoveNode) {
+        const currentMoveNode = this.moveTree.getCurrentNode();
+        if (!currentMoveNode) {
             return;
         }
-        const move = this.currentMoveNode.move;
+        const move = currentMoveNode.getMove();
         if (move.castling) {
             this.reverseCastling(move);
         } else {
@@ -122,32 +86,24 @@ export default class ChessGame {
             }
         }
         this.turn = this.turn === 'w' ? 'b' : 'w';
-        this.currentMoveNode = this.currentMoveNode.getPrevious();
+        this.moveTree.stepBack();
     }
 
     canMoveBack() {
-        return this.currentMoveNode !== undefined;
+        return this.moveTree.canStepBack();
     }
 
     canMoveForward() {
-        return this.getNextMove() !== undefined;
+        return this.moveTree.canStepForward();
     }
 
-    getNextMove(): MoveNode | undefined {
-        if (this.currentMoveNode) {
-            return this.currentMoveNode.getNextMove();
-        }
-        const rootMove = this.moveTree.at(0);
-        return rootMove;
-    }
     moveForward() {
-        const nextMove = this.getNextMove();
+        const nextMove = this.moveTree.stepForward()
         if (!nextMove) {
             return;
         }
         const move = nextMove.move;
         this.move(move);
-        this.currentMoveNode = nextMove;
     }
 
 
@@ -171,11 +127,11 @@ export default class ChessGame {
         }
         if (!to.takes) {
             this.move(validatedMove);
-            this.updateMoveTree(validatedMove);
+            this.moveTree.addNextMove(validatedMove);
             return true;
         } else if (from.piece.isOpponent(to.takes)) {
             this.move(validatedMove);
-            this.updateMoveTree(validatedMove);
+            this.moveTree.addNextMove(validatedMove);
             return true;
         }
         return false;
@@ -291,18 +247,36 @@ export default class ChessGame {
         return true;
     }
 
-    private updateMoveTree(move: Move) {
-        if (this.currentMoveNode) {
-            const nextMoveNode = this.currentMoveNode.addNextMove(move);
-            this.currentMoveNode = nextMoveNode;
-        } else {
-            const root = new MoveNode(move, ".1");
-            this.moveTree.push(root);
-            this.currentMoveNode = root;
-        }
+    static movePiece(chessBoard: ChessBoard, from: Square, to: Square) {
+        const newChessBoard = chessBoard.clone();
+        const piece = newChessBoard.getPiece(from);
+        piece?.setMoved();
+        newChessBoard.setSquare({ row: from.row, column: from.column, piece: null });
+        newChessBoard.setPiece({ row: to.row, column: to.column }, piece);
+        return newChessBoard;
     }
 
-    private getOptionalCastling(move: Move): Castling | null {
+    static computeEnPassent(move: Move) {
+        const { from, row, column, piece } = move;
+        let enPassant = new EnPassant('-');
+        if (!from) {
+            return enPassant;
+        }
+        const rowDelta = row - from.row;
+        if (piece?.toFen().toLowerCase() === 'p') {
+            switch (rowDelta) {
+                case 2:
+                    enPassant = new EnPassant(`${columnLetters[column]}${row - 1}`, move);
+                    break;
+                case -2:
+                    enPassant = new EnPassant(`${columnLetters[column]}${row + 1}`, move);
+                    break;
+            }
+        }
+        return enPassant;
+    }
+
+    getOptionalCastling(move: Move): Castling | null {
         if (move.piece.hasMoved()) {
             return null;
         }
@@ -316,7 +290,7 @@ export default class ChessGame {
         return this.getOptionalCastlingForKing(move, kingSquare);
     }
 
-    private getOptionalCastlingForKing(move: Move, kingSquare: SquareWithPiece): Castling | null {
+    getOptionalCastlingForKing(move: Move, kingSquare: SquareWithPiece): Castling | null {
         if (!this.castling) {
             return null;
         }
@@ -368,7 +342,7 @@ export default class ChessGame {
         return null;
     }
 
-    private updateCastling(move: Move) {
+    updateCastling(move: Move) {
         if (!this.castling) {
             return;
         }
@@ -399,7 +373,7 @@ export default class ChessGame {
         }
     }
 
-    private reverseCastling(move: Move) {
+    reverseCastling(move: Move) {
         // TODO: reverse castling should reset all valid castling states, currently only reset the state of th performed castling
         if (!this.castling || !move.castling) {
             return;
@@ -426,7 +400,7 @@ export default class ChessGame {
         }
     }
 
-    private getAllMoves(color: PlayerColor, chessBoard: ChessBoard, checkCheck: boolean): Move[] {
+    getAllMoves(color: PlayerColor, chessBoard: ChessBoard, checkCheck: boolean): Move[] {
         const squares = chessBoard.getAllSquares();
         const moves: Move[] = [];
         squares.forEach(square => {
@@ -441,7 +415,7 @@ export default class ChessGame {
      * It is the same as getAllMoves, but it excludes castling
      * moves, needed to prevent exceeding call stack.
      */
-    private getAllMovesExcludingCastling(color: PlayerColor, chessBoard: ChessBoard, checkCheck: boolean): Move[] {
+    getAllMovesExcludingCastling(color: PlayerColor, chessBoard: ChessBoard, checkCheck: boolean): Move[] {
         const squares = chessBoard.getAllSquares();
         const moves: Move[] = [];
         squares.forEach(square => {
