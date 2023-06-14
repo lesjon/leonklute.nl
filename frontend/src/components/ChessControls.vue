@@ -6,8 +6,19 @@
       <q-btn flat @click="expand = !expand" :icon="expand ? 'expand_less' : 'expand_more'" />
     </q-card-actions>
     <q-card-section v-if="expand" style="max-width: inherit;" class="q-gutter-sm">
-      <q-input outlined readonly dense :model-value="fen"  @click="copyFen"/>
-      <q-table :rows="mainLine" :columns="COLUMNS" :rows-per-page-options="[0]" hide-no-data/>
+      <q-input outlined readonly dense :model-value="fen" @click="copyFen" />
+      <q-table :rows="mainLine" :columns="COLUMNS" :rows-per-page-options="[0]" hide-no-data>
+        <template v-slot:body-cell-moveWhite="props">
+          <q-td :props="props" :class="(props.row.highlightWhite) ? 'bg-accent' : ''">
+            {{ props.value }}
+          </q-td>
+        </template>
+        <template v-slot:body-cell-moveBlack="props">
+          <q-td :props="props" :class="(props.row.highlightBlack) ? 'bg-accent' : ''">
+            {{ props.value }}
+          </q-td>
+        </template>
+      </q-table>
     </q-card-section>
   </q-card>
 </template>
@@ -22,10 +33,38 @@ import { columnLetters } from './chess-board';
 
 interface MovesWithIndex {
   index: number;
+  highlightWhite: boolean,
+  highlightBlack?: boolean,
   moveWhite: Move;
-  moveBlack: Move;
+  moveBlack?: Move;
 }
 
+const san = new San();
+
+const
+  COLUMNS: QTableColumn[] = [
+    {
+      name: 'index',
+      label: '#',
+      field: 'index',
+      align: 'left',
+      style: 'width: 3ch',
+    },
+    {
+      name: 'moveWhite',
+      label: 'White',
+      field: 'moveWhite',
+      align: 'left',
+      format: (move) => san.formatMove(move)
+    },
+    {
+      name: 'moveBlack',
+      label: 'Black',
+      field: 'moveBlack',
+      align: 'left',
+      format: (move) => san.formatMove(move)
+    }
+  ]
 
 export default defineComponent({
   name: 'ChessControls',
@@ -36,32 +75,9 @@ export default defineComponent({
   },
   emits: ['flip', 'new-game'],
   data() {
-    const san = new San();
     return {
       columnLetters,
-      COLUMNS: [
-        {
-          name: 'index',
-          label: '#',
-          field: 'index',
-          align: 'left',
-          style: 'width: 3ch',
-        },
-        {
-          name: 'moveWhite',
-          label: 'White',
-          field: 'moveWhite',
-          align: 'left',
-          format: (move) => san.formatMove(move)
-        },
-        {
-          name: 'moveBlack',
-          label: 'Black',
-          field: 'moveBlack',
-          align: 'left',
-          format: (move) => san.formatMove(move)
-        },
-      ] as QTableColumn[],
+      COLUMNS,
       san,
       expand: true,
     };
@@ -74,13 +90,19 @@ export default defineComponent({
       return Fen.toFen(this.game);
     },
     mainLine(): MovesWithIndex[] {
-      const indexedMoves = this.game?.getMainLine()?.map((move, index) => { return { index, move } }) ?? [];
+      if (!this.game) {
+        return [];
+      }
+      const currentMove = this.game.getCurrentMoveNode();
+      const indexedMoves = this.game?.getMainLine()?.map((moveNode, index) => { return { index, moveNode: moveNode } }) ?? [];
       const movesWithIndex: MovesWithIndex[] = [];
       for (let i = 0; i < indexedMoves.length; i += 2) {
         movesWithIndex.push({
           index: (indexedMoves[i].index / 2) + 1,
-          moveWhite: indexedMoves[i].move,
-          moveBlack: indexedMoves[i + 1]?.move,
+          moveWhite: indexedMoves[i].moveNode.move,
+          moveBlack: indexedMoves[i + 1]?.moveNode.move,
+          highlightWhite: indexedMoves[i].moveNode.id === currentMove?.id,
+          highlightBlack: indexedMoves[i + 1]?.moveNode.id === currentMove?.id
         });
       }
       return movesWithIndex;
