@@ -1,7 +1,7 @@
 import ChessBoard from './chess-board';
 import ChessGame, { CastlingState } from './chess-game';
 import Move, { Castling, EnPassant } from './chess-move';
-import { chessPieceFromType, ChessPieceType, PlayerColor } from './chess-pieces';
+import ChessPiece, { chessPieceFromType, ChessPieceType, PlayerColor } from './chess-pieces';
 
 
 const fenToPiece = (fen: string): ChessPieceType | null => {
@@ -91,28 +91,31 @@ export default class Fen {
         return `${board} ${game.turn} ${castling} ${game.enPassant.toFen()} ${game.halfMove} ${game.fullMove}`;
     }
 
-    static castlingFen(castlingState: CastlingState) {
+    static castlingFen(castlingState?: CastlingState) {
         let castling = '';
-        if (castlingState.whiteShort) {
+        if (!castlingState) {
+            return '-';
+        }
+        if (castlingState.whiteShort?.allowed) {
             castling += 'K';
         }
-        if (castlingState.whiteLong) {
+        if (castlingState.whiteLong?.allowed) {
             castling += 'Q';
         }
-        if (castlingState.blackShort) {
+        if (castlingState.blackShort?.allowed) {
             castling += 'k';
         }
-        if (castlingState.blackLong) {
+        if (castlingState.blackLong?.allowed) {
             castling += 'q';
         }
         return castling || '-';
     }
 
     static castlingFromFen(castlingFen: string, ChessBoard: ChessBoard) {
-        let whiteShort = undefined;
-        let whiteLong = undefined;
-        let blackShort = undefined;
-        let blackLong = undefined;
+        let whiteShort;
+        let whiteLong;
+        let blackShort;
+        let blackLong;
 
         const whiteKing = ChessBoard.getPieces(ChessPieceType.whiteKing).at(0);
         const blackKing = ChessBoard.getPieces(ChessPieceType.blackKing).at(0);
@@ -129,8 +132,7 @@ export default class Fen {
             } else {
                 const rookMove: Move = { from: { row: rook.row, column: rook.column }, row: rook.row, column: 6, piece: rook.piece };
                 const kingMove: Move = { from: { row: whiteKing.row, column: whiteKing.column }, row: whiteKing.row, column: 7, piece: whiteKing.piece };
-                whiteShort = new Castling(kingMove, rookMove)
-
+                whiteShort = new Castling(kingMove, rookMove, true)
             }
 
         }
@@ -142,7 +144,7 @@ export default class Fen {
             } else {
                 const rookMove: Move = { from: { row: rook.row, column: rook.column }, row: rook.row, column: 4, piece: rook.piece };
                 const kingMove: Move = { from: { row: whiteKing.row, column: whiteKing.column }, row: whiteKing.row, column: 3, piece: whiteKing.piece };
-                whiteLong = new Castling(kingMove, rookMove);
+                whiteLong = new Castling(kingMove, rookMove, true);
             }
         }
         if (castlingFen.includes('k')) {
@@ -153,7 +155,7 @@ export default class Fen {
             } else {
                 const rookMove: Move = { from: { row: rook.row, column: rook.column }, row: rook.row, column: 6, piece: rook.piece };
                 const kingMove: Move = { from: { row: blackKing.row, column: blackKing.column }, row: blackKing.row, column: 7, piece: blackKing.piece };
-                blackShort = new Castling(kingMove, rookMove)
+                blackShort = new Castling(kingMove, rookMove, true)
             }
 
         }
@@ -162,11 +164,10 @@ export default class Fen {
             const rook = rooks.at(0);
             if (!rook) {
                 console.error('Invalid castling state; no appropriate rook found');
-
             } else {
                 const rookMove: Move = { from: { row: rook.row, column: rook.column }, row: rook.row, column: 4, piece: rook.piece };
                 const kingMove: Move = { from: { row: blackKing.row, column: blackKing.column }, row: blackKing.row, column: 3, piece: blackKing.piece };
-                blackLong = new Castling(kingMove, rookMove);
+                blackLong = new Castling(kingMove, rookMove, true);
             }
         }
         return new CastlingState(whiteShort, whiteLong, blackShort, blackLong);

@@ -7,22 +7,22 @@ import Player from './player';
 
 
 export class CastlingState {
-    whiteShort: Castling | null;
-    whiteLong: Castling | null;
-    blackShort: Castling | null;
-    blackLong: Castling | null;
+    whiteShort?: Castling;
+    whiteLong?: Castling;
+    blackShort?: Castling;
+    blackLong?: Castling;
     constructor(whiteShort?: Castling, whiteLong?: Castling, blackShort?: Castling, blackLong?: Castling) {
-        this.whiteShort = whiteShort ?? null;
-        this.whiteLong = whiteLong ?? null;
-        this.blackShort = blackShort ?? null;
-        this.blackLong = blackLong ?? null;
+        this.whiteShort = whiteShort;
+        this.whiteLong = whiteLong;
+        this.blackShort = blackShort;
+        this.blackLong = blackLong;
     }
 }
 
 
 export default class ChessGame {
     turn: PlayerColor = 'w';
-    castling = new CastlingState();
+    castling?: CastlingState;
     enPassant = new EnPassant('-');
     halfMove = '0';
     fullMove = '1';
@@ -110,8 +110,7 @@ export default class ChessGame {
         }
         const move = this.currentMoveNode.move;
         if (move.castling) {
-            const kingMovedChessBoard = ChessGame.movePiece(this.chessBoard, move.castling.kingMove, move.castling.kingMove.from!);
-            this.chessBoard = ChessGame.movePiece(kingMovedChessBoard, move.castling.rookMove, move.castling.rookMove.from!);
+            this.reverseCastling(move);
         } else {
             this.chessBoard = ChessGame.movePiece(this.chessBoard, move, move.from!);
         }
@@ -303,6 +302,9 @@ export default class ChessGame {
     }
 
     getOptionalCastlingForKing(move: Move, kingSquare: SquareWithPiece): Castling | null {
+        if (!this.castling) {
+            return null;
+        }
         const rookType = kingSquare.piece.getColor() === 'w' ? ChessPieceType.whiteRook : ChessPieceType.blackRook;
         const long = kingSquare.piece.getColor() === 'w' ? this.castling.whiteLong : this.castling.blackLong;
         const short = kingSquare.piece.getColor() === 'w' ? this.castling.whiteShort : this.castling.blackShort;
@@ -337,26 +339,63 @@ export default class ChessGame {
         return null;
     }
 
-    updateCastling(move: Move) {
+    private updateCastling(move: Move) {
+        if (!this.castling) {
+            return;
+        }
         const whiteKing = this.chessBoard.getKing('w');
         const blackKing = this.chessBoard.getKing('b');
         if (move.piece.getType() === ChessPieceType.whiteKing) {
-            this.castling.whiteShort = null;
-            this.castling.whiteLong = null;
+            if (this.castling.whiteShort)
+                this.castling.whiteShort.allowed = false;
+            if (this.castling.whiteLong)
+                this.castling.whiteLong.allowed = false;
         } else if (move.piece.getType() === ChessPieceType.blackKing) {
-            this.castling.blackShort = null;
-            this.castling.blackLong = null;
+            if (this.castling.blackShort)
+                this.castling.blackShort.allowed = false;
+            if (this.castling.blackLong)
+                this.castling.blackLong.allowed = false;
         } else if (move.piece.getType() === ChessPieceType.whiteRook && whiteKing && move.from && move.from?.column < whiteKing?.column) {
-            this.castling.whiteLong = null;
+            if (this.castling.whiteLong)
+                this.castling.whiteLong.allowed = false;
         } else if (move.piece.getType() === ChessPieceType.whiteRook && whiteKing && move.from && move.from?.column > whiteKing?.column) {
-            this.castling.whiteShort = null;
+            if (this.castling.whiteShort)
+                this.castling.whiteShort.allowed = false;
         } else if (move.piece.getType() === ChessPieceType.blackRook && blackKing && move.from && move.from?.column < blackKing?.column) {
-            this.castling.blackLong = null;
+            if (this.castling.blackLong)
+                this.castling.blackLong.allowed = false;
         } else if (move.piece.getType() === ChessPieceType.blackRook && blackKing && move.from && move.from?.column > blackKing?.column) {
-            this.castling.blackShort = null;
+            if (this.castling.blackShort)
+                this.castling.blackShort.allowed = false;
         }
     }
 
+    private reverseCastling(move: Move) {
+        // TODO: reverse castling should reset all valid castling states, currently only reset the state of th performed castling
+        if (!this.castling || !move.castling) {
+            return;
+        }
+        const kingMovedChessBoard = ChessGame.movePiece(this.chessBoard, move.castling.kingMove, move.castling.kingMove.from!);
+        this.chessBoard = ChessGame.movePiece(kingMovedChessBoard, move.castling.rookMove, move.castling.rookMove.from!);
+        const color = move.piece.getColor();
+        if (move.shortCastle) {
+            if (color === 'w') {
+                if (this.castling.whiteShort)
+                    this.castling.whiteShort.allowed = true;
+            } else {
+                if (this.castling.blackShort)
+                    this.castling.blackShort.allowed = true;
+            }
+        } else if (move.longCastle) {
+            if (color === 'w') {
+                if (this.castling.whiteLong)
+                    this.castling.whiteLong.allowed = true;
+            } else {
+                if (this.castling.blackLong)
+                    this.castling.blackLong.allowed = true;
+            }
+        }
+    }
 
     getAllMoves(color: PlayerColor, chessBoard: ChessBoard, checkCheck: boolean): Move[] {
         const squares = chessBoard.getAllSquares();

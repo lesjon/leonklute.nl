@@ -76,7 +76,7 @@ export default interface ChessPiece {
     clone(): ChessPiece;
 }
 
-export const chessPieceFromType = (pieceType: ChessPieceType): ChessPiece | null => {
+export const chessPieceFromType = (pieceType: ChessPieceType): ChessPiece => {
     switch (pieceType) {
         case ChessPieceType.whiteKing:
             return new King(pieceType);
@@ -102,8 +102,6 @@ export const chessPieceFromType = (pieceType: ChessPieceType): ChessPiece | null
             return new Knight(pieceType);
         case ChessPieceType.blackPawn:
             return new Pawn(pieceType);
-        default:
-            return null;
     }
 }
 

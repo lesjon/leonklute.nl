@@ -39,8 +39,10 @@ export class EnPassant implements Square {
 export class Castling {
     rookMove: Move;
     kingMove: Move;
-    constructor(kingMove: Move, rookMove: Move) {
+    allowed: boolean;
+    constructor(kingMove: Move, rookMove: Move, allowed: boolean) {
         this.kingMove = kingMove;
         this.rookMove = rookMove;
+        this.allowed = allowed;
     }
 }
