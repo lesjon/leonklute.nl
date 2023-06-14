@@ -13,8 +13,21 @@
 <script lang="ts">
 import { defineComponent, PropType } from 'vue';
 import { Square, columnLetters, rows } from './chess-board';
-import ChessPiece from './chess-pieces';
+import ChessPiece, { ChessPieceType } from './chess-pieces';
 import PromotionPicker from './PromotionPicker.vue';
+
+import blackBishop from 'assets/pieces/bishop_black.png';
+import blackKnight from 'assets/pieces/knight_black.png';
+import blackRook from 'assets/pieces/rook_black.png';
+import blackKing from 'assets/pieces/king_black.png';
+import blackQueen from 'assets/pieces/queen_black.png';
+import blackPawn from 'assets/pieces/pawn_black.png';
+import whiteBishop from 'assets/pieces/bishop_white.png';
+import whiteKnight from 'assets/pieces/knight_white.png';
+import whiteRook from 'assets/pieces/rook_white.png';
+import whiteKing from 'assets/pieces/king_white.png';
+import whiteQueen from 'assets/pieces/queen_white.png';
+import whitePawn from 'assets/pieces/pawn_white.png';
 
 export default defineComponent({
     name: 'ChessSquare',
@@ -61,8 +74,34 @@ export default defineComponent({
         },
         pieceImageFilename() {
             if (!this.piece)
-                return;
-            return `src/assets/pieces/${this.piece.getFullName()}.png`;
+                return '';
+            switch(this.piece.getType()) {
+                case ChessPieceType.blackBishop:
+                    return blackBishop;
+                case ChessPieceType.blackKnight:
+                    return blackKnight;
+                case ChessPieceType.blackRook:
+                    return blackRook;
+                case ChessPieceType.blackKing:
+                    return blackKing;
+                case ChessPieceType.blackQueen:
+                    return blackQueen;
+                case ChessPieceType.blackPawn:
+                    return blackPawn;
+                case ChessPieceType.whiteBishop:
+                    return whiteBishop;
+                case ChessPieceType.whiteKnight:
+                    return whiteKnight;
+                case ChessPieceType.whiteRook:
+                    return whiteRook;
+                case ChessPieceType.whiteKing:
+                    return whiteKing;
+                case ChessPieceType.whiteQueen:
+                    return whiteQueen;
+                case ChessPieceType.whitePawn:
+                    return whitePawn;
+            }
+            return '';
         },
         selected() {
             const selected = this.row === this.selectedSquare?.row && this.column === this.selectedSquare?.column;
