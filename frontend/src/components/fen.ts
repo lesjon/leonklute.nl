@@ -174,6 +174,8 @@ export default class Fen {
         return new CastlingState(whiteShort, whiteLong, blackShort, blackLong);
     }
     static gameFromStartPosition(): ChessGame {
-        return Fen.fenParser(Fen.start_position_fen);
+        const newGame = Fen.fenParser(Fen.start_position_fen);
+        newGame.gameDetails.dateTime = new Date();
+        return newGame;
     }
 }

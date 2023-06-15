@@ -1,15 +1,17 @@
 <template>
   <q-card style="width: 80ch; ">
     <q-card-actions align="between">
-      <q-btn class="q-mr-md" color="primary" label="New Game" @click="$emit('new-game')" />
-      <q-btn class="q-mr-md" color="primary" label="Draw" @click="() => game?.draw()" />
-      <q-btn class="q-mr-md" color="primary" label="Flip Board" @click="$emit('flip')" />
-      <q-btn class="q-mr-md" color="primary" label="View PGN" @click="viewPgn = true" :disable="game === undefined"/>
+      <q-btn color="primary" label="New Game" @click="$emit('new-game')" />
+      <q-btn color="primary" label="Draw" @click="() => game?.draw()" />
+      <q-btn color="primary" label="Flip Board" @click="$emit('flip')" />
       <q-btn flat @click="expand = !expand" :icon="expand ? 'expand_less' : 'expand_more'" />
     </q-card-actions>
     <q-card-section v-if="expand" style="max-width: inherit;" class="q-gutter-sm">
-      <q-input outlined readonly dense :model-value="fen" @click="copyFen" />
-      <q-table :rows="mainLine" :columns="COLUMNS" :rows-per-page-options="[0]" hide-no-data dense>
+      <div class="row">
+        <q-input class="col-grow" outlined readonly dense :model-value="fen" @click="copyFen" />
+        <q-btn color="primary" label="View PGN" @click="viewPgn = true" :disable="game === undefined" />
+      </div>
+      <q-table :rows="mainLine" :columns="columns" :rows-per-page-options="[0]" hide-no-data dense>
         <template v-slot:body-cell-moveWhite="props">
           <q-td :props="props" style="font-size: large;" :class="(props.row.highlightWhite) ? 'bg-accent' : ''">
             {{ props.value }}
@@ -22,6 +24,11 @@
         </template>
         <template v-slot:pagination>
           <q-tr>
+            <q-td colspan="3">
+              <q-select color="primary" label="format" style="width: 12ch;" v-model="sanFormat"
+                :options="sanFormatOptions" />
+
+            </q-td>
             <q-td colspan="3" class="text-right">
               <q-btn flat icon="chevron_left" @click="game?.moveBack()" :disable="!game?.canMoveBack()" />
             </q-td>
@@ -45,7 +52,7 @@ import PgnViewer from './PgnViewer.vue';
 import ChessGame from './chess-game';
 import Move from './chess-move';
 import Fen from './fen';
-import San from './san';
+import San, { SanFormat } from './san';
 import { columnLetters } from './chess-board';
 
 interface MovesWithIndex {
@@ -56,31 +63,10 @@ interface MovesWithIndex {
   moveBlack?: Move;
 }
 
-const san = new San();
-
-const COLUMNS: QTableColumn[] = [
-  {
-    name: 'index',
-    label: '#',
-    field: 'index',
-    align: 'left',
-    style: 'width: 3ch',
-  },
-  {
-    name: 'moveWhite',
-    label: 'White',
-    field: 'moveWhite',
-    align: 'left',
-    format: (move) => san.formatMove(move)
-  },
-  {
-    name: 'moveBlack',
-    label: 'Black',
-    field: 'moveBlack',
-    align: 'left',
-    format: (move) => san.formatMove(move)
-  }
-]
+interface SanFormatOption {
+  label: string;
+  value: SanFormat;
+}
 
 export default defineComponent({
   name: 'ChessControls',
@@ -92,10 +78,14 @@ export default defineComponent({
   },
   emits: ['flip', 'new-game'],
   data() {
+    const sanFormatOptions = Object.entries(SanFormat).map(([key, value]) => {
+      return { label: key, value: value };
+    }).filter((option) => typeof option.value === 'number') as SanFormatOption[];
     return {
       columnLetters,
-      COLUMNS,
-      san,
+      SanFormat,
+      sanFormatOptions,
+      sanFormat: sanFormatOptions[0],
       expand: true,
       viewPgn: false,
     };
@@ -124,6 +114,32 @@ export default defineComponent({
         });
       }
       return movesWithIndex;
+    },
+    columns(): QTableColumn[] {
+      const san = San.create(this.sanFormat.value);
+      return [
+        {
+          name: 'index',
+          label: '#',
+          field: 'index',
+          align: 'left',
+          style: 'width: 3ch',
+        },
+        {
+          name: 'moveWhite',
+          label: 'White',
+          field: 'moveWhite',
+          align: 'left',
+          format: (move) => san.formatMove(move)
+        },
+        {
+          name: 'moveBlack',
+          label: 'Black',
+          field: 'moveBlack',
+          align: 'left',
+          format: (move) => san.formatMove(move)
+        }
+      ]
     }
   },
   methods: {

@@ -15,7 +15,8 @@ export default class Pgn {
         pgn += Pgn.createTag('White', game.whitePlayer?.name ?? 'white');
         pgn += Pgn.createTag('Black', game.blackPlayer?.name ?? 'black');
         pgn += Pgn.createTag('Result', Pgn.parseResult(game.result) ?? '*');
-        pgn += Pgn.createTag('TimeControl', gameDetails.timeControl)
+        pgn += Pgn.createTag('TimeControl', gameDetails.timeControl);
+        pgn += Pgn.createTag('Time', Pgn.parseTime(gameDetails.dateTime));
         pgn += Pgn.createTag('Termination', gameDetails.termination);
         pgn += Pgn.createTag('Annotator', gameDetails.annotator);
         pgn += Pgn.createTag('PlyCount', gameDetails.plyCount?.toString());
@@ -57,5 +58,12 @@ export default class Pgn {
             return '????.??.??';
         }
         return `${date.getFullYear()}.${date.getMonth()}.${date.getDate()}`;
+    }
+
+    private static parseTime(date?: Date) {
+        if (!date) {
+            return '00:00:00';
+        }
+        return `${date.getHours()}:${date.getMinutes()}:${date.getSeconds()}`;
     }
 }

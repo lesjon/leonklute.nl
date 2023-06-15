@@ -1,7 +1,7 @@
 <template>
   <q-card>
     <q-card-section @click="clip(pgn)">
-      <pre>{{ pgn }}</pre>
+      <pre style="white-space: pre-wrap;">{{ pgn }}</pre>
     </q-card-section>
   </q-card>
 </template>
