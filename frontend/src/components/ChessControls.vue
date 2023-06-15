@@ -2,7 +2,9 @@
   <q-card style="width: 80ch; ">
     <q-card-actions align="between">
       <q-btn class="q-mr-md" color="primary" label="New Game" @click="$emit('new-game')" />
+      <q-btn class="q-mr-md" color="primary" label="Draw" @click="() => game?.draw()" />
       <q-btn class="q-mr-md" color="primary" label="Flip Board" @click="$emit('flip')" />
+      <q-btn class="q-mr-md" color="primary" label="View PGN" @click="viewPgn = true" :disable="game === undefined"/>
       <q-btn flat @click="expand = !expand" :icon="expand ? 'expand_less' : 'expand_more'" />
     </q-card-actions>
     <q-card-section v-if="expand" style="max-width: inherit;" class="q-gutter-sm">
@@ -30,12 +32,16 @@
         </template>
       </q-table>
     </q-card-section>
+    <q-dialog v-model="viewPgn" v-if="game">
+      <PgnViewer :game="game" />
+    </q-dialog>
   </q-card>
 </template>
 
 <script lang="ts">
 import { copyToClipboard, QTableColumn } from 'quasar';
 import { defineComponent, PropType } from 'vue';
+import PgnViewer from './PgnViewer.vue';
 import ChessGame from './chess-game';
 import Move from './chess-move';
 import Fen from './fen';
@@ -78,8 +84,11 @@ const COLUMNS: QTableColumn[] = [
 
 export default defineComponent({
   name: 'ChessControls',
+  components: {
+    PgnViewer
+  },
   props: {
-    game: ChessGame as PropType<ChessGame>,
+    game: ChessGame,
   },
   emits: ['flip', 'new-game'],
   data() {
@@ -88,6 +97,7 @@ export default defineComponent({
       COLUMNS,
       san,
       expand: true,
+      viewPgn: false,
     };
   },
   computed: {

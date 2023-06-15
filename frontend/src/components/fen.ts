@@ -48,8 +48,8 @@ export default class Fen {
         const game: ChessGame = new ChessGame();
         game.turn = fenArray[1] as PlayerColor;
         game.enPassant = new EnPassant(fenArray[3]);
-        game.halfMove = fenArray[4];
-        game.fullMove = fenArray[5];
+        game.halfMove = parseInt(fenArray[4]);
+        game.fullMove = parseInt(fenArray[5]);
         const boardArray = board.split('/').reverse();
         const chessBoard = new ChessBoard(8, 8);
         const board2DArray = boardArray.map(row => {
@@ -70,6 +70,7 @@ export default class Fen {
         chessBoard.setBoard(board2DArray);
         game.castling = this.castlingFromFen(fenArray[2], chessBoard);
         game.chessBoard = chessBoard;
+        game.gameDetails.fen = fen;
         return game;
     }
 

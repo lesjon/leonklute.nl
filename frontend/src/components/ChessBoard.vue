@@ -21,7 +21,7 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, PropType } from 'vue';
+import { defineComponent } from 'vue';
 import { columns, isSameLocation, rows, Square } from './chess-board';
 import ChessGame from './chess-game';
 import Move from './chess-move';
@@ -35,7 +35,7 @@ export default defineComponent({
     ChessSquare, PlayerCard
   },
   props: {
-    game: ChessGame as PropType<ChessGame>,
+    game: ChessGame,
     flipped: {
       type: Boolean,
       default: false,

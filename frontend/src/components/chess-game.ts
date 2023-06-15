@@ -1,7 +1,7 @@
 import ChessBoard, { columnLetters, columns, isSameLocation, rows, Square, SquareWithPiece } from './chess-board';
 import Move, { Castling, EnPassant } from './chess-move';
 import { chessPieceFromType, ChessPieceType, PlayerColor } from './chess-pieces';
-import MoveTree, {MoveNode} from './move-tree';
+import MoveTree, { MoveNode } from './move-tree';
 import Player from './player';
 
 export class CastlingState {
@@ -17,18 +17,36 @@ export class CastlingState {
     }
 }
 
+export interface Result {
+    whiteScore: number;
+    blackScore: number;
+}
 
-export default class ChessGame{
+interface gameDetails {
+    event?: string;
+    site?: string;
+    dateTime?: Date;
+    round?: string;
+    annotator?: string;
+    plyCount?: number;
+    timeControl?: string;
+    termination?: string;
+    mode?: string;
+    fen?: string;
+}
+
+export default class ChessGame {
+    gameDetails: gameDetails = {};
     turn: PlayerColor = 'w';
     castling?: CastlingState;
     enPassant = new EnPassant('-');
-    halfMove = '0';
-    fullMove = '1';
+    halfMove = 0;
+    fullMove = 1;
     check = false;
     chessBoard: ChessBoard = new ChessBoard(8, 8);
     whitePlayer?: Player;
     blackPlayer?: Player;
-    winner?: Player;
+    result: Result = { whiteScore: 0.0, blackScore: 0.0 };;
 
     moveTree: MoveTree = new MoveTree();
 
@@ -53,15 +71,21 @@ export default class ChessGame{
         }
         this.enPassant = ChessGame.computeEnPassent(move);
         this.turn = this.turn === 'w' ? 'b' : 'w';
+        this.incrementMoveCounter(move);
         this.check = this.isInCheck(this.turn, this.chessBoard);
         if (this.check) {
             move.check = true;
             if (this.getAllMoves(this.turn, this.chessBoard, true).length === 0) {
                 move.checkmate = true;
-                this.winner = this.turn === 'w' ? this.blackPlayer : this.whitePlayer;
+                this.result = this.turn === 'w' ? { whiteScore: 0, blackScore: 1 } : { whiteScore: 1, blackScore: 0 };
             }
         }
         this.updateCastling(move);
+    }
+
+    draw() {
+        this.result['whiteScore'] = 0.5;
+        this.result['blackScore'] = 0.5;
     }
 
     moveBack() {
@@ -86,7 +110,26 @@ export default class ChessGame{
             }
         }
         this.turn = this.turn === 'w' ? 'b' : 'w';
+        this.decremetMoveCounter();
         this.moveTree.stepBack();
+    }
+
+    incrementMoveCounter(move: Move) {
+        if (this.turn === 'w') {
+            this.fullMove++;
+        }
+        if (move.takes || move.piece?.getType() === ChessPieceType.whitePawn || move.piece?.getType() === ChessPieceType.blackPawn) {
+            this.halfMove = 0;
+        } else {
+            this.halfMove++;
+        }
+    }
+
+    decremetMoveCounter() {
+        if (this.turn === 'b') {
+            this.fullMove--;
+        }
+        this.halfMove--;
     }
 
     canMoveBack() {
@@ -175,7 +218,7 @@ export default class ChessGame{
                 if (!(attackedPiece || canEnPassant) && step.requiresTake) {
                     break;
                 }
-                if ((step.shortCastle || step.longCastle) ) {
+                if ((step.shortCastle || step.longCastle)) {
                     if (excludeCastling) {
                         break;
                     }

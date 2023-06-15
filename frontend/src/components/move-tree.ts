@@ -109,7 +109,7 @@ export class MoveNode {
         return this.children.length;
     }
 
-    private createNextMoveIndex() {
+    createNextMoveIndex() {
         const getNumberOfLines = this.getNumberOfLines();
         if (getNumberOfLines === 0) {
             const lastIndexOfDot = this.id.lastIndexOf('.');
