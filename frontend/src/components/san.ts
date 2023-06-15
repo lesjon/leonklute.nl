@@ -10,25 +10,25 @@ export enum SanFormat {
     Coordinate,
 }
 
-export default class San {
-    static create(format: SanFormat) {
+export default class SanFormatter {
+    static create(format: SanFormat): SanFormatter {
         switch (format) {
             case SanFormat.Long:
-                return new LongSan();
+                return new LongSanFormatter();
             case SanFormat.Short:
-                return new ShortSan();
+                return new ShortSanFormatter();
             case SanFormat.FigurineShort:
-                return new ShortFigurineSan();
+                return new ShortFigurineSanFormatter();
             case SanFormat.FigurineLong:
-                return new LongFigurineSan();
+                return new LongFigurineSanFormatter();
             case SanFormat.Coordinate:
-                return new CoordinateSan();
+                return new CoordinateSanFormatter();
             default:
-                return new ShortSan();
+                return new ShortSanFormatter();
         }
     }
 
-    fromSymbol(move: Move) {
+    fromSymbol(move: Move): string {
         const piece = move.piece;
         const pawnTakes = piece.toFen().toLowerCase() === 'p' && move.takes && move.from;
         if (pawnTakes && move.from) {
@@ -97,10 +97,10 @@ export default class San {
 }
 
 
-class ShortSan extends San {
+class ShortSanFormatter extends SanFormatter {
 }
 
-class ShortFigurineSan extends ShortSan {
+class ShortFigurineSanFormatter extends ShortSanFormatter {
     override pieceSymbol(piece: ChessPiece): string {
         switch (piece.getType()) {
             case ChessPieceType.whitePawn:
@@ -132,7 +132,7 @@ class ShortFigurineSan extends ShortSan {
     }
 }
 
-class LongSan extends San {
+class LongSanFormatter extends SanFormatter {
 
     override fromSymbol(move: Move) {
         let symbol = '';
@@ -144,13 +144,13 @@ class LongSan extends San {
         return symbol;
     }
 
-    override takeSymbol(move: Move): string {
+    override takeSymbol(move: Move) {
         return move.takes ? 'x'+ this.pieceSymbol(move.takes) : '';
     }
 }
 
-class LongFigurineSan extends LongSan {
-    override pieceSymbol(piece: ChessPiece): string {
+class LongFigurineSanFormatter extends LongSanFormatter {
+    override pieceSymbol(piece: ChessPiece) {
         switch (piece.getType()) {
             case ChessPieceType.whitePawn:
                 return '♙'
@@ -182,16 +182,16 @@ class LongFigurineSan extends LongSan {
     }
 }
 
-class CoordinateSan extends LongSan {
-    override pieceSymbol(): string {
+class CoordinateSanFormatter extends LongSanFormatter {
+    override pieceSymbol() {
         return '';
     }
 
-    override takeSymbol(move: Move): string {
+    override takeSymbol() {
         return '';
     }
 
-    override formatPromotion(move: Move): string {
+    override formatPromotion(move: Move) {
         switch(move.promotion?.getType()) {
             case ChessPieceType.whiteKnight:
             case ChessPieceType.blackKnight:
@@ -210,7 +210,7 @@ class CoordinateSan extends LongSan {
         }
     }
 
-    override checkSymbol(move: Move) {
+    override checkSymbol() {
         return '';
     }
 }

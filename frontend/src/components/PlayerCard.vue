@@ -1,8 +1,10 @@
 <template>
-  <q-banner v-if="player">
-    <q-avatar>
-      <img :src="player.avatar" />
-    </q-avatar>
+  <q-banner v-if="player" class="bg-accent" style="min-width: 20em;" rounded>
+    <template v-slot:avatar>
+      <q-avatar>
+        <q-img :src="player.avatar"/>
+      </q-avatar>
+    </template>
     <q-badge color="primary" v-if="player.title">{{ player.title }}</q-badge>
     {{ player.name }}
   </q-banner>
@@ -22,7 +24,7 @@ export default defineComponent({
     color: {
       type: String as PropType<PlayerColor>,
       default: 'w',
-    },
+    }
   },
   computed: {
     player() {

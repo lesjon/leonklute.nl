@@ -3,6 +3,7 @@ import Move, { Castling, EnPassant } from './chess-move';
 import { chessPieceFromType, ChessPieceType, PlayerColor } from './chess-pieces';
 import MoveTree from './move-tree';
 import Player from './player';
+import DefaultAvatar from '../assets/default_avatar.png';
 
 export class CastlingState {
     whiteShort?: Castling;
@@ -52,7 +53,9 @@ export default class ChessGame {
 
     constructor() {
         this.blackPlayer = new Player('black', 1, 'NB');
+        this.blackPlayer.avatar = DefaultAvatar;
         this.whitePlayer = new Player('white', 0);
+        this.whitePlayer.avatar = DefaultAvatar;
     }
 
     getPieceAt(row: number, column: number) {

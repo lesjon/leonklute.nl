@@ -2,16 +2,18 @@
   <div :style="`max-width: ${boardsize}vh; user-select: none`">
     <q-responsive :ratio="8 / 9" class="col">
       <div>
-        <player-card class="row" :game="game" :color="flipped ? 'w' : 'b'" />
+        <div class="row justify-between" style="position: relative;">
+          <player-card class="row" :game="game" :color="flipped ? 'w' : 'b'" :size="`${boardsize / 20}vh`" />
+        </div>
         <div class="row" v-for="row in processedRows" :key="row">
           <chess-square class="col" v-for="column in processedColumns" :key="column" :row="row" :column="column"
-            :piece="game?.getPieceAt(row, column)" :selected-square="selectedSquare"
-            @mousedown="onSquareMouseDown" @mouseup="onSquareMouseUp"
-            :highlight="possibleMoves.some(sqr => isSameLocation({ row, column }, sqr))" 
-            @promotion="promotionSelection" :promotion-selection="promotionSquare && isSameLocation(promotionSquare, {row, column})"/>
+            :piece="game?.getPieceAt(row, column)" :selected-square="selectedSquare" @mousedown="onSquareMouseDown"
+            @mouseup="onSquareMouseUp" :highlight="possibleMoves.some(sqr => isSameLocation({ row, column }, sqr))"
+            @promotion="promotionSelection"
+            :promotion-selection="promotionSquare && isSameLocation(promotionSquare, { row, column })" />
         </div>
         <div class="row justify-between" style="position: relative;">
-          <player-card class="row" :game="game" :color="flipped ? 'b' : 'w'" />
+          <player-card :game="game" :color="flipped ? 'b' : 'w'" :size="`${boardsize / 20}vh`" />
           <q-btn fab flat icon="zoom_out_map" style="position: absolute; right: -40px; top: -15px;"
             v-touch-pan.prevent.mouse="moveFab" />
         </div>
@@ -63,9 +65,9 @@ export default defineComponent({
   methods: {
     isSameLocation,
     onSquareMouseDown(square: Square) {
-      if(!this.selectedSquare) {
+      if (!this.selectedSquare) {
         this.selectSquareAndCalculatePossibleMoves(square);
-      } else if(isSameLocation(this.selectedSquare, square)) {
+      } else if (isSameLocation(this.selectedSquare, square)) {
         this.selectedSquare = undefined;
         this.possibleMoves = [];
         return;
@@ -89,7 +91,7 @@ export default defineComponent({
       }
       if (game?.movePieceIfLegal(move)) {
         this.selectedSquare = undefined;
-        this.possibleMoves = [];        
+        this.possibleMoves = [];
         this.promotionSquare = undefined;
         this.promotion = undefined;
       } else {
@@ -101,7 +103,7 @@ export default defineComponent({
     },
     async getPromotionType(square: Square) {
       this.promotionSquare = square;
-      while (!this.promotion && this.promotionSquare && isSameLocation(this.promotionSquare , square)) {
+      while (!this.promotion && this.promotionSquare && isSameLocation(this.promotionSquare, square)) {
         await new Promise(resolve => setTimeout(resolve, 10));
       }
       const promotion = this.promotion;

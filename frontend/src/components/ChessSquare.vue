@@ -1,7 +1,7 @@
 <template>
   <q-responsive ratio="1">
     <div :style="style" style="display: grid;" @mousedown="onMouseDown" @mouseup="onMouseUp">
-      <q-img loading="eager" :src="pieceImageFilename" v-if="piece" class="on-square" no-spinner/>
+      <q-img loading="eager" no-transition :src="pieceImageFilename" v-if="piece" class="on-square" no-spinner/>
       <div class="highlight on-square" v-if="highlight" style="grid-column: 1; grid-row: 1;"></div>
       <div class="dot on-square" v-if="selected" style="grid-column: 1; grid-row: 1;"></div>
       <span class="on-square">{{ columnLetters[column] }}{{ row }}</span>

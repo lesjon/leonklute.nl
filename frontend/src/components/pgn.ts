@@ -1,9 +1,9 @@
 import ChessGame, { Result } from './chess-game';
-import San, { SanFormat } from './san';
+import SanFormatter, { SanFormat } from './san';
 
 
 export default class Pgn {
-    san = San.create(SanFormat.Short);
+    san = SanFormatter.create(SanFormat.Short);
 
     parseGamge(game: ChessGame) {
         let pgn = '';
