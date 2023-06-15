@@ -1,5 +1,5 @@
-import ChessGame, { Result } from "./chess-game";
-import San, { SanFormat } from "./san";
+import ChessGame, { Result } from './chess-game';
+import San, { SanFormat } from './san';
 
 
 export default class Pgn {

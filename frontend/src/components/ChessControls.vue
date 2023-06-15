@@ -40,7 +40,7 @@
 
 <script lang="ts">
 import { copyToClipboard, QTableColumn } from 'quasar';
-import { defineComponent, PropType } from 'vue';
+import { defineComponent } from 'vue';
 import PgnViewer from './PgnViewer.vue';
 import ChessGame from './chess-game';
 import Move from './chess-move';

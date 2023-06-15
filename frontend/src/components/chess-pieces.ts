@@ -1,4 +1,4 @@
-import { pieceToFen } from "./fen";
+import { pieceToFen } from './fen';
 
 export type PlayerColor = 'w' | 'b';
 

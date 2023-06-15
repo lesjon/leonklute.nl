@@ -63,7 +63,6 @@ export default defineComponent({
   methods: {
     isSameLocation,
     onSquareMouseDown(square: Square) {
-      const game = this.game;
       if(!this.selectedSquare) {
         this.selectSquareAndCalculatePossibleMoves(square);
       } else if(isSameLocation(this.selectedSquare, square)) {

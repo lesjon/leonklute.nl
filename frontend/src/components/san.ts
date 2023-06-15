@@ -1,6 +1,6 @@
-import { columnLetters } from "./chess-board";
-import Move from "./chess-move";
-import ChessPiece, { ChessPieceType } from "./chess-pieces";
+import { columnLetters } from './chess-board';
+import Move from './chess-move';
+import ChessPiece, { ChessPieceType } from './chess-pieces';
 
 export enum SanFormat {
     Long,
@@ -170,7 +170,7 @@ class LongFigurineSan extends LongSan {
 }
 
 class CoordinateSan extends LongSan {
-    override pieceSymbol(piece: ChessPiece): string {
+    override pieceSymbol(): string {
         return '';
     }
 }

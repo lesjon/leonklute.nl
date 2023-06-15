@@ -35,7 +35,7 @@ export default defineComponent({
       required: false,
     }
   },
-  emits: ["select"],
+  emits: ['select'],
   data() {
     return {
       ChessPieceType,

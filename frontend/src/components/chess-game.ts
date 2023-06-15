@@ -1,7 +1,7 @@
 import ChessBoard, { columnLetters, columns, isSameLocation, rows, Square, SquareWithPiece } from './chess-board';
 import Move, { Castling, EnPassant } from './chess-move';
 import { chessPieceFromType, ChessPieceType, PlayerColor } from './chess-pieces';
-import MoveTree, { MoveNode } from './move-tree';
+import MoveTree from './move-tree';
 import Player from './player';
 
 export class CastlingState {
@@ -61,10 +61,10 @@ export default class ChessGame {
 
     move(move: Move) {
         if (move.castling) {
-            const kingMovedChessBoard = ChessGame.movePiece(this.chessBoard, move.castling.kingMove.from!, move.castling.kingMove);
-            this.chessBoard = ChessGame.movePiece(kingMovedChessBoard, move.castling.rookMove.from!, move.castling.rookMove);
+            const kingMovedChessBoard = ChessGame.movePiece(this.chessBoard, move.castling.kingMove.from, move.castling.kingMove);
+            this.chessBoard = ChessGame.movePiece(kingMovedChessBoard, move.castling.rookMove.from, move.castling.rookMove);
         } else {
-            this.chessBoard = ChessGame.movePiece(this.chessBoard, move.from!, move);
+            this.chessBoard = ChessGame.movePiece(this.chessBoard, move.from, move);
         }
         if (move.promotion) {
             this.chessBoard.setPiece(move, move.promotion);
@@ -97,10 +97,10 @@ export default class ChessGame {
         if (move.castling) {
             this.reverseCastling(move);
         } else {
-            this.chessBoard = ChessGame.movePiece(this.chessBoard, move, move.from!);
+            this.chessBoard = ChessGame.movePiece(this.chessBoard, move, move.from);
         }
         if (move.promotion) {
-            this.chessBoard.setPiece(move.from!, move.piece);
+            this.chessBoard.setPiece(move.from, move.piece);
         }
         if (move.takes) {
             if (move.enPassant?.squareToTake) {
@@ -234,7 +234,7 @@ export default class ChessGame {
                     break;
                 }
                 if (checkCheck) {
-                    const newPosition = ChessGame.movePiece(this.chessBoard, nextMove.from!, nextMove);
+                    const newPosition = ChessGame.movePiece(this.chessBoard, nextMove.from, nextMove);
                     if (nextMove.promotion) {
                         newPosition.setPiece(nextMove, nextMove.promotion);
                     }
@@ -421,8 +421,8 @@ export default class ChessGame {
         if (!this.castling || !move.castling) {
             return;
         }
-        const kingMovedChessBoard = ChessGame.movePiece(this.chessBoard, move.castling.kingMove, move.castling.kingMove.from!);
-        this.chessBoard = ChessGame.movePiece(kingMovedChessBoard, move.castling.rookMove, move.castling.rookMove.from!);
+        const kingMovedChessBoard = ChessGame.movePiece(this.chessBoard, move.castling.kingMove, move.castling.kingMove.from);
+        this.chessBoard = ChessGame.movePiece(kingMovedChessBoard, move.castling.rookMove, move.castling.rookMove.from);
         const color = move.piece.getColor();
         if (move.shortCastle) {
             if (color === 'w') {

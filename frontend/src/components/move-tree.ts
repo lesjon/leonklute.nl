@@ -1,4 +1,4 @@
-import Move from "./chess-move";
+import Move from './chess-move';
 
 export default class MoveTree {
     root?: MoveNode;
@@ -17,7 +17,7 @@ export default class MoveTree {
     }
 
     stepBack() {
-        const popped = this.path.pop();
+        this.path.pop();
         return this.getCurrentNode();
     }
 

@@ -1,5 +1,5 @@
-import { Square, columnLetters } from "./chess-board";
-import ChessPiece from "./chess-pieces";
+import { Square, columnLetters } from './chess-board';
+import ChessPiece from './chess-pieces';
 
 export default interface Move extends Square {
     piece: ChessPiece;
@@ -7,7 +7,7 @@ export default interface Move extends Square {
     enPassant?: EnPassant;
     castling?: Castling;
     promotion?: ChessPiece;
-    from?: Square;
+    from: Square;
     check?: boolean;
     checkmate?: boolean;
     shortCastle?: boolean;

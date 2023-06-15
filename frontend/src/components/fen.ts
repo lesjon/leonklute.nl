@@ -84,7 +84,7 @@ export default class Fen {
                     return '1';
                 }
             });
-            return rowArray.join('').replace(/1+/g, (match, p1) => match.length.toString());
+            return rowArray.join('').replace(/1+/g, match => match.length.toString());
         });
         const board = boardArray.reverse().join('/');
 
