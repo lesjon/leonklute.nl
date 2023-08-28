@@ -56,7 +56,7 @@ const essentialLinks = [
   {
     title: 'Chess',
     icon: 'groups',
-    link: 'https://www.leonklute.nl/chess'
+    link: '/#/chess'
   }
 ]
 
