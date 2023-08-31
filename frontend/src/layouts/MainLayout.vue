@@ -15,7 +15,7 @@
     <q-drawer v-model="leftDrawerOpen" show-if-above bordered>
       <q-list>
         <q-item-label header>
-          Essential Links
+          Links
         </q-item-label>
 
         <essential-link v-for="link in essentialLinks" :key="link.title" v-bind="link" />
@@ -55,8 +55,13 @@ const essentialLinks = [
   },
   {
     title: 'Chess',
-    icon: 'groups',
+    icon: 'sports_esports',
     link: '/#/chess'
+  },
+  {
+    title: 'Blogs',
+    icon: 'article',
+    link: 'http://blog.leonklute.nl'
   }
 ]
 
